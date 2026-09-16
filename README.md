@@ -112,9 +112,9 @@ Binaries will be generated in `src-tauri/target/release/bundle/`.
 
 ## 📦 Direct Downloads (v0.1.0)
 
-- **Windows Setup Installer**: [Chavosh_0.1.0_x64-setup.exe](https://github.com/mjb4khshi/chavosh/releases/latest/download/Chavosh_0.1.0_x64-setup.exe)
-- **Windows MSI Package**: [Chavosh_0.1.0_x64_en-US.msi](https://github.com/mjb4khshi/chavosh/releases/latest/download/Chavosh_0.1.0_x64_en-US.msi)
-- **Standalone Portable Executable**: [chavosh.exe](https://github.com/mjb4khshi/chavosh/releases/latest/download/chavosh.exe)
+- **Windows Setup Installer**: [Chavosh_0.1.0_x64-setup.exe](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64-setup.exe)
+- **Windows MSI Package**: [Chavosh_0.1.0_x64_en-US.msi](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64_en-US.msi)
+- **Standalone Portable Executable**: [chavosh.exe](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/chavosh.exe)
 
 ---
 
