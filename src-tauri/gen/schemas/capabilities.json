@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Default capability for Chavosh","local":true,"windows":["main"],"permissions":["core:default","dialog:default","fs:default"]}}

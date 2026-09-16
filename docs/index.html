@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>چاووش | Chavosh - Modern Desktop Music Player</title>
+  
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="چاووش | Chavosh - Modern Desktop Music Player" />
+  <meta name="description" content="موزیک پلیر مدرن، فوق‌العاده سبک و زیبا برای دسکتاپ بر پایه Tauri v2، Rust و زبان طراحی سرو (Sarv UI) با ۵ حالت پخش و فیزیک واقعی گرامافون." />
+  <meta name="keywords" content="Chavosh, music player, tauri, rust, vinyl, gramophone, sarv ui, react 19, desktop player, موزیک پلیر, چاووش" />
+  <meta name="author" content="MJ Bakhshi" />
+
+  <!-- Open Graph / Facebook / Telegram / WhatsApp -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://github.com/mjb4khshi/chavosh" />
+  <meta property="og:title" content="چاووش | Chavosh - Modern Desktop Music Player" />
+  <meta property="og:description" content="موزیک پلیر مدرن و سبک دسکتاپ با فیزیک واقعی گرامافون، ویجت‌های شناور و سرعت نیتیو راست." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/mjb4khshi/chavosh/master/chavosh%20banner.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter / X -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://github.com/mjb4khshi/chavosh" />
+  <meta property="twitter:title" content="چاووش | Chavosh - Modern Desktop Music Player" />
+  <meta property="twitter:description" content="موزیک پلیر مدرن و سبک دسکتاپ با فیزیک واقعی گرامافون، ویجت‌های شناور و سرعت نیتیو راست." />
+  <meta property="twitter:image" content="https://raw.githubusercontent.com/mjb4khshi/chavosh/master/chavosh%20banner.png" />
+
+  <link rel="icon" type="image/png" href="./logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@300;400;500;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #0066a4;
+      --primary-hover: #0077c2;
+      --primary-glow: rgba(0, 102, 164, 0.45);
+      --bg: #07080c;
+      --bg-surface: #0d0f17;
+      --bg-card: rgba(18, 21, 32, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.18);
+      --text: #f0f3fa;
+      --text-dim: #949db2;
+      --text-muted: #5e6678;
+      --accent: #fe28a2;
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 28px;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Vazirmatn', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 102, 164, 0.25), transparent 70%),
+        radial-gradient(circle at 90% 80%, rgba(254, 40, 162, 0.08), transparent 50%),
+        radial-gradient(circle at 10% 40%, rgba(0, 102, 164, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    html[dir="ltr"] body {
+      font-family: 'Plus Jakarta Sans', 'Vazirmatn', system-ui, sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navbar */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background: rgba(7, 8, 12, 0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+    .nav-links a:hover {
+      color: #fff;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+      text-align: center;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px var(--primary-glow);
+    }
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-hover);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .btn-lg {
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      border-radius: var(--radius-md);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 60px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 102, 164, 0.12);
+      border: 1px solid rgba(0, 102, 164, 0.3);
+      color: #38bdf8;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    .hero-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .hero-title {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, #fff 20%, #7dd3fc 70%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-dim);
+      max-width: 680px;
+      margin: 0 auto 36px;
+      font-weight: 400;
+    }
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    /* Download Dropdown */
+    .download-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 110%;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: #111420;
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      min-width: 280px;
+      padding: 8px;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .download-dropdown:hover .dropdown-menu,
+    .download-dropdown.active .dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s ease;
+    }
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+    .dropdown-item .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(0, 102, 164, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38bdf8;
+      font-size: 14px;
+    }
+    .dropdown-item .details {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+    }
+    html[dir="ltr"] .dropdown-item .details {
+      text-align: left;
+    }
+    .dropdown-item .details span:last-child {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Hero Banner Display */
+    .hero-banner-wrap {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      max-width: 1060px;
+      margin: 0 auto;
+      background: #000;
+    }
+    .hero-banner-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-banner-wrap:hover img {
+      transform: scale(1.02);
+    }
+
+    /* Section Styles */
+    .section {
+      padding: 90px 0;
+    }
+    .section-header {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 54px;
+    }
+    .section-tag {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+    }
+
+    /* 5 Modes Bento Cards */
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 24px;
+    }
+    .mode-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .mode-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .mode-card.col-7 { grid-column: span 7; }
+    .mode-card.col-5 { grid-column: span 5; }
+    .mode-card.col-4 { grid-column: span 4; }
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+    .mode-card h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .mode-card p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Interactive Vinyl Turntable Mockup */
+    .vinyl-preview-box {
+      background: #090a10;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+    }
+    .vinyl-disc {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: repeating-radial-gradient(circle, #08080c 0%, #15161f 2px, #08080c 4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.05);
+      position: relative;
+      animation: spin 8s linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vinyl-label {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 3px #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      color: #fff;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Themes Showcase */
+    .themes-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      max-width: 860px;
+      margin: 0 auto 40px;
+    }
+    .theme-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      border-radius: var(--radius-full);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theme-pill:hover, .theme-pill.active {
+      border-color: var(--primary);
+      background: rgba(0, 102, 164, 0.15);
+      transform: translateY(-2px);
+    }
+    .theme-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    /* Shortcuts Table */
+    .shortcuts-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      overflow-x: auto;
+    }
+    .shortcuts-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+    html[dir="ltr"] .shortcuts-table {
+      text-align: left;
+    }
+    .shortcuts-table th {
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .shortcuts-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.95rem;
+    }
+    kbd {
+      display: inline-block;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+    .footer-links a:hover {
+      color: #fff;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .mode-card.col-7,
+      .mode-card.col-5,
+      .mode-card.col-4 {
+        grid-column: span 12;
+      }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <img src="./logo.png" alt="Chavosh Logo" />
+        <span>چاووش | Chavosh</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features" data-fa="ویژگی‌ها" data-en="Features">ویژگی‌ها</a>
+        <a href="#modes" data-fa="حالات پخش" data-en="Player Modes">حالات پخش</a>
+        <a href="#themes" data-fa="تم‌ها" data-en="Themes">تم‌ها</a>
+        <a href="#shortcuts" data-fa="میانبرها" data-en="Shortcuts">میانبرها</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <button id="lang-btn" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.85rem;" onclick="toggleLang()">
+          🌐 English
+        </button>
+
+        <!-- GitHub Link -->
+        <a href="https://github.com/mjb4khshi/chavosh" target="_blank" class="btn btn-outline" style="padding: 8px 14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span class="hidden sm:inline">GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero container">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span data-fa="نسخه جدید v0.1.0 با موتور نیتیو Rust منتشر شد" data-en="New v0.1.0 Released with Native Rust Audio Engine">نسخه جدید v0.1.0 با موتور نیتیو Rust منتشر شد</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span data-fa="اصالت گرامافون واینیل" data-en="Vintage Vinyl Soul">اصالت گرامافون واینیل</span><br>
+      <span class="gradient-text" data-fa="با قدرت و سرعت نیتیو راست" data-en="Native Rust Performance">با قدرت و سرعت نیتیو راست</span>
+    </h1>
+
+    <p class="hero-subtitle" data-fa="موزیک پلیر مدرن، فوق‌العاده سبک و زیبا برای دسکتاپ بر پایه Tauri v2 و زبان طراحی سرو (Sarv UI) با انیمیشن‌های نرم، ۵ حالت پخش و فیزیک واقع‌گرایانه واینیل." data-en="A state-of-the-art desktop music player blending vintage vinyl aesthetics with futuristic mini widgets and high-performance native audio playback.">
+      موزیک پلیر مدرن، فوق‌العاده سبک و زیبا برای دسکتاپ بر پایه Tauri v2 و زبان طراحی سرو (Sarv UI) با انیمیشن‌های نرم، ۵ حالت پخش و فیزیک واقع‌گرایانه واینیل.
+    </p>
+
+    <!-- CTAs -->
+    <div class="hero-cta">
+      <!-- Main Download Button with Dropdown -->
+      <div class="download-dropdown">
+        <a href="https://github.com/mjb4khshi/chavosh/releases/latest/download/Chavosh_0.1.0_x64-setup.exe" class="btn btn-primary btn-lg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-fa="دانلود مستقیم برای ویندوز" data-en="Download for Windows">دانلود مستقیم برای ویندوز</span>
+          <span style="font-size: 0.75rem; opacity: 0.8; font-family: monospace;">(x64 .exe)</span>
+        </a>
+
+        <!-- Dropdown Packages -->
+        <div class="dropdown-menu">
+          <a href="https://github.com/mjb4khshi/chavosh/releases/latest/download/Chavosh_0.1.0_x64-setup.exe" class="dropdown-item">
+            <div class="icon">⚡</div>
+            <div class="details">
+              <span data-fa="نصب‌کننده ویزارد ویندوز" data-en="Windows Setup Installer">نصب‌کننده ویزارد ویندوز</span>
+              <span>Chavosh_0.1.0_x64-setup.exe</span>
+            </div>
+          </a>
+
+          <a href="https://github.com/mjb4khshi/chavosh/releases/latest/download/Chavosh_0.1.0_x64_en-US.msi" class="dropdown-item">
+            <div class="icon">📦</div>
+            <div class="details">
+              <span data-fa="بسته نصبی ام‌اس‌آی" data-en="Windows MSI Package">بسته نصبی ام‌اس‌آی</span>
+              <span>Chavosh_0.1.0_x64_en-US.msi</span>
+            </div>
+          </a>
+
+          <a href="https://github.com/mjb4khshi/chavosh/releases/latest/download/chavosh.exe" class="dropdown-item">
+            <div class="icon">🚀</div>
+            <div class="details">
+              <span data-fa="نسخه پرتابل (بدون نیاز به نصب)" data-en="Standalone Portable">نسخه پرتابل (بدون نیاز به نصب)</span>
+              <span>chavosh.exe</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <a href="https://github.com/mjb4khshi/chavosh" target="_blank" class="btn btn-outline btn-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.784 1.399 8.165-7.333-3.856-7.333 3.856 1.399-8.165-5.934-5.784 8.2-1.192zm0 5.702l-2.232 4.523-4.991.725 3.612 3.521-.852 4.97 4.463-2.347 4.463 2.347-.852-4.97 3.612-3.521-4.991-.725z"/></svg>
+        <span data-fa="مشاهده در گیت‌هاب" data-en="Star on GitHub">مشاهده در گیت‌هاب</span>
+      </a>
+    </div>
+
+    <!-- Banner Showcase -->
+    <div class="hero-banner-wrap">
+      <img src="./banner.png" alt="Chavosh Application Showcase" />
+    </div>
+  </section>
+
+  <!-- 5 Modes Section -->
+  <section id="modes" class="section container">
+    <div class="section-header">
+      <span class="section-tag" data-fa="حالات پخش" data-en="5 Player Modes">حالات پخش</span>
+      <h2 class="section-title" data-fa="تجربه شنیداری متناسب با هر لحظه" data-en="Tailored for Every Moment">تجربه شنیداری متناسب با هر لحظه</h2>
+      <p class="section-subtitle" data-fa="از یک کتابخانه بزرگ و کامل برای مدیریت صدها آلبوم تا ویجت‌های فوق‌العاده سبک و شناور روی میزکار شما." data-en="From a complete music library browser to floating widgets on your desktop.">
+        از یک کتابخانه بزرگ و کامل برای مدیریت صدها آلبوم تا ویجت‌های فوق‌العاده سبک و شناور روی میزکار شما.
+      </p>
+    </div>
+
+    <div class="modes-grid">
+      <!-- 1. Desktop Library -->
+      <div class="mode-card col-7">
+        <div>
+          <span class="mode-badge">1180 × 780 px</span>
+          <h3 data-fa="کتابخانه کامل دسکتاپ (Library)" data-en="Desktop Library View">کتابخانه کامل دسکتاپ (Library)</h3>
+          <p data-fa="نمایش گرید و لیست آلبوم‌ها، مدیریت پیشرفته صف پخش (Queue)، سیستم هوشمند جستجوی سریع فارسی و انگلیسی با Ctrl+K، و کارت‌های آماری بنتو." data-en="Comprehensive music management with Bento metrics, smart fuzzy search, queue drawer, and lyrics sync.">
+            نمایش گرید و لیست آلبوم‌ها، مدیریت پیشرفته صف پخش (Queue)، سیستم هوشمند جستجوی سریع فارسی و انگلیسی با Ctrl+K، و کارت‌های آماری بنتو.
+          </p>
+        </div>
+        <div style="height: 120px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-dim);">
+          🗂️ Sarv UI Bento Grid & Fast Queue
+        </div>
+      </div>
+
+      <!-- 2. Vinyl Room -->
+      <div class="mode-card col-5">
+        <div>
+          <span class="mode-badge">Fullscreen Overlay</span>
+          <h3 data-fa="اتاق گرامافون و دیسک سی‌دی" data-en="Vinyl Room & CD Player">اتاق گرامافون و دیسک سی‌دی</h3>
+          <p data-fa="چرخش واقعی واینیل، بازتاب هفت‌رنگ سی‌دی، حرکت فیزیکی بازوی سوزن و انیمیشن‌های نرم تعویض کاور و متن آهنگ." data-en="Realistic spinning grooves, CD rainbow sheen, tonearm physics, and smooth crossfade transitions.">
+            چرخش واقعی واینیل، بازتاب هفت‌رنگ سی‌دی، حرکت فیزیکی بازوی سوزن و انیمیشن‌های نرم تعویض کاور و متن آهنگ.
+          </p>
+        </div>
+        <div class="vinyl-preview-box">
+          <div class="vinyl-disc">
+            <div class="vinyl-label">CH</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Floating Gramophone -->
+      <div class="mode-card col-4">
+        <span class="mode-badge">Desktop Widget</span>
+        <h3 data-fa="ویجت شناور گرامافون" data-en="Floating Gramophone Widget">ویجت شناور گرامافون</h3>
+        <p data-fa="ویجت گرد و ترنسپرنت با اندازه شناور درصدی (۸۰٪ تا ۱۳۰٪)، همگام‌سازی بلادرنگ رنگ با کاور آهنگ، کنترل‌های هاور و اسلایدر ولوم." data-en="Frameless transparent desktop vinyl gadget with dynamic sizing, cover-matched palette, and hover controls.">
+          ویجت گرد و ترنسپرنت با اندازه شناور درصدی (۸۰٪ تا ۱۳۰٪)، همگام‌سازی بلادرنگ رنگ با کاور آهنگ، کنترل‌های هاور و اسلایدر ولوم.
+        </p>
+      </div>
+
+      <!-- 4. Dynamic Island -->
+      <div class="mode-card col-4">
+        <span class="mode-badge">356 × 48 px</span>
+        <h3 data-fa="داینامیک آیلند کپسولی" data-en="Dynamic Island Capsule">داینامیک آیلند کپسولی</h3>
+        <p data-fa="پنجره نانو با ویژوالایزر زنده ۳ خطی، نوار پیشرفت مویی زیر کپسول، نام آهنگ متحرک و مینی‌دکمه‌های کنترل." data-en="Ultra-compact 48px capsule with animated 3-bar soundwave EQ, track ticker, and micro-controls.">
+          پنجره نانو با ویژوالایزر زنده ۳ خطی، نوار پیشرفت مویی زیر کپسول، نام آهنگ متحرک و مینی‌دکمه‌های کنترل.
+        </p>
+      </div>
+
+      <!-- 5. Mini Player -->
+      <div class="mode-card col-4">
+        <span class="mode-badge">416 × 106 px</span>
+        <h3 data-fa="مینی پلیر کارتی شیشه‌ای" data-en="Compact Mini Card">مینی پلیر کارتی شیشه‌ای</h3>
+        <p data-fa="کارت شیشه‌ای بلور با افکت درخشش نور محیطی (Ambient Glow)، اسلایدر ولوم خطی، اسکرابر زمان و قابلیت پین دائم." data-en="Glassmorphic card with artwork ambient glow, inline volume slider, timeline, and always-on-top pin.">
+          کارت شیشه‌ای بلور با افکت درخشش نور محیطی (Ambient Glow)، اسلایدر ولوم خطی، اسکرابر زمان و قابلیت پین دائم.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Themes Section -->
+  <section id="themes" class="section container">
+    <div class="section-header">
+      <span class="section-tag" data-fa="شخصی‌سازی" data-en="Personalization">شخصی‌سازی</span>
+      <h2 class="section-title" data-fa="۸ تم اختصاصی با هارمونی رنگی چشم‌نواز" data-en="8 Curated Sarv UI Color Themes">۸ تم اختصاصی با هارمونی رنگی چشم‌نواز</h2>
+      <p class="section-subtitle" data-fa="روی هر تم کلیک کنید تا تغییر رنگ زنده صفحه را مشاهده نمایید." data-en="Click on any theme to preview live palette accents.">
+        روی هر تم کلیک کنید تا تغییر رنگ زنده صفحه را مشاهده نمایید.
+      </p>
+    </div>
+
+    <!-- Theme Switcher Pills -->
+    <div class="themes-wrapper">
+      <button class="theme-pill active" onclick="setTheme('#0066a4', this)">
+        <span class="theme-dot" style="background: #0066a4;"></span>
+        <span>چاووش تیره (Chavosh Dark)</span>
+      </button>
+
+      <button class="theme-pill" onclick="setTheme('#00e5ff', this)">
+        <span class="theme-dot" style="background: #00e5ff;"></span>
+        <span>اقیانوس تاریک (Midnight Abyss)</span>
+      </button>
+
+      <button class="theme-pill" onclick="setTheme('#10b981', this)">
+        <span class="theme-dot" style="background: #10b981;"></span>
+        <span>جنگل زمرد (Emerald Woods)</span>
+      </button>
+
+      <button class="theme-pill" onclick="setTheme('#f43f5e', this)">
+        <span class="theme-dot" style="background: #f43f5e;"></span>
+        <span>رز یاقوتی (Ruby Rose)</span>
+      </button>
+
+      <button class="theme-pill" onclick="setTheme('#f59e0b', this)">
+        <span class="theme-dot" style="background: #f59e0b;"></span>
+        <span>افق غروب (Sunset Horizon)</span>
+      </button>
+
+      <button class="theme-pill" onclick="setTheme('#a855f7', this)">
+        <span class="theme-dot" style="background: #a855f7;"></span>
+        <span>سایبرپانک نئون (Cyberpunk Neon)</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Shortcuts Section -->
+  <section id="shortcuts" class="section container">
+    <div class="section-header">
+      <span class="section-tag" data-fa="بهره‌وری" data-en="Productivity">بهره‌وری</span>
+      <h2 class="section-title" data-fa="کنترل کامل با کلیدهای میانبر کیبورد" data-en="Global Keyboard Shortcuts">کنترل کامل با کلیدهای میانبر کیبورد</h2>
+    </div>
+
+    <div class="shortcuts-card">
+      <table class="shortcuts-table">
+        <thead>
+          <tr>
+            <th data-fa="کلید میانبر" data-en="Shortcut">کلید میانبر</th>
+            <th data-fa="عملکرد" data-en="Action">عملکرد</th>
+            <th data-fa="توضیحات" data-en="Description">توضیحات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><kbd>Space</kbd></td>
+            <td data-fa="پخش / توقف" data-en="Play / Pause">پخش / توقف</td>
+            <td data-fa="کنترل فوری وضعیت پخش آهنگ" data-en="Toggle track playback state">کنترل فوری وضعیت پخش آهنگ</td>
+          </tr>
+          <tr>
+            <td><kbd>→</kbd> / <kbd>MediaNext</kbd></td>
+            <td data-fa="آهنگ بعدی" data-en="Next Track">آهنگ بعدی</td>
+            <td data-fa="پرش به آهنگ بعدی در صف" data-en="Skip to next queue item">پرش به آهنگ بعدی در صف</td>
+          </tr>
+          <tr>
+            <td><kbd>←</kbd> / <kbd>MediaPrev</kbd></td>
+            <td data-fa="آهنگ قبلی" data-en="Previous Track">آهنگ قبلی</td>
+            <td data-fa="پرش به آهنگ قبلی در صف" data-en="Skip to previous track">پرش به آهنگ قبلی در صف</td>
+          </tr>
+          <tr>
+            <td><kbd>↑</kbd> / <kbd>↓</kbd></td>
+            <td data-fa="تنظیم صدا" data-en="Volume Up / Down">تنظیم صدا</td>
+            <td data-fa="افزایش یا کاهش صدا با گام ۵ درصدی" data-en="Adjust volume in 5% increments">افزایش یا کاهش صدا با گام ۵ درصدی</td>
+          </tr>
+          <tr>
+            <td><kbd>M</kbd></td>
+            <td data-fa="قطع / وصل صدا" data-en="Toggle Mute">قطع / وصل صدا</td>
+            <td data-fa="میوت فوری با آیکون خطی Iconsax" data-en="Instant mute with linear icon">میوت فوری با آیکون خطی Iconsax</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl</kbd> + <kbd>K</kbd></td>
+            <td data-fa="جستجوی سریع" data-en="Instant Search">جستجوی سریع</td>
+            <td data-fa="فوکوس آنی روی فیلد سرچ کتابخانه" data-en="Instant focus search input">فوکوس آنی روی فیلد سرچ کتابخانه</td>
+          </tr>
+          <tr>
+            <td><kbd>P</kbd></td>
+            <td data-fa="پین پنجره (Always on Top)" data-en="Pin Window">پین پنجره (Always on Top)</td>
+            <td data-fa="نگه‌داشتن پلیر بالای همه برنامه‌ها" data-en="Keep player on top of all windows">نگه‌داشتن پلیر بالای همه برنامه‌ها</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer container">
+    <div class="footer-links">
+      <a href="https://github.com/mjb4khshi/chavosh" target="_blank">GitHub Repository</a>
+      <a href="https://github.com/mjb4khshi/chavosh/releases" target="_blank">Releases</a>
+      <a href="https://github.com/mjb4khshi/chavosh/blob/master/LICENSE" target="_blank">MIT License</a>
+    </div>
+    <p>
+      ساخته شده با ❤️ و سلیقه برای جامعه متن‌باز و عاشقان موسیقی • Developed by <a href="https://github.com/mjb4khshi" target="_blank" style="color: #38bdf8; font-weight: bold;">MJ Bakhshi</a>
+    </p>
+  </footer>
+
+  <script>
+    let currentLang = 'fa';
+
+    function toggleLang() {
+      currentLang = currentLang === 'fa' ? 'en' : 'fa';
+      document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+      document.documentElement.lang = currentLang;
+      document.getElementById('lang-btn').textContent = currentLang === 'fa' ? '🌐 English' : '🇮🇷 فارسی';
+
+      document.querySelectorAll('[data-fa]').forEach(el => {
+        el.textContent = currentLang === 'fa' ? el.getAttribute('data-fa') : el.getAttribute('data-en');
+      });
+    }
+
+    function setTheme(color, btn) {
+      document.documentElement.style.setProperty('--primary', color);
+      document.documentElement.style.setProperty('--primary-glow', color + '73');
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>
