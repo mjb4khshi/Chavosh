@@ -112,9 +112,10 @@ npm run tauri build
 
 ## 📦 لینک‌های دانلود مستقیم (نسخه 0.1.0)
 
-- **فایل نصبی ویندوز (Setup Installer)**: [Chavosh_0.1.0_x64-setup.exe](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64-setup.exe)
+- **فایل نصبی ویندوز (پیشنهادی)**: [Chavosh_0.1.0_x64-setup.exe](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64-setup.exe)
+- **بسته پرتابل زیپ (شامل وابستگی‌ها)**: [Chavosh_0.1.0_Portable.zip](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_Portable.zip)
 - **بسته نصبی MSI**: [Chavosh_0.1.0_x64_en-US.msi](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64_en-US.msi)
-- **فایل پرتابل و بدون نیاز به نصب (EXE)**: [chavosh.exe](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/chavosh.exe)
+- **فایل اجرایی خام**: [chavosh.exe](https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/chavosh.exe)
 
 ---
 
