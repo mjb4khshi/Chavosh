@@ -42,7 +42,7 @@
       "icons/icon.ico"
     ],
     "resources": [
-      "icons/*"
+      "WebView2Loader.dll"
     ]
   },
   "plugins": {
