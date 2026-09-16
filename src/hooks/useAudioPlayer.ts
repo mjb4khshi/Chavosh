@@ -3,6 +3,21 @@ import { usePlayerStore, selectCurrentTrack } from "../stores/playerStore";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { getTrackCover } from "../utils/window";
 
+let lastGlobalNavTime = 0;
+export const safeNextTrack = () => {
+  const now = Date.now();
+  if (now - lastGlobalNavTime < 450) return;
+  lastGlobalNavTime = now;
+  usePlayerStore.getState().next();
+};
+
+export const safePrevTrack = () => {
+  const now = Date.now();
+  if (now - lastGlobalNavTime < 450) return;
+  lastGlobalNavTime = now;
+  usePlayerStore.getState().prev();
+};
+
 export function useAudioPlayer() {
   const audioARef = useRef<HTMLAudioElement | null>(null);
   const audioBRef = useRef<HTMLAudioElement | null>(null);
@@ -134,10 +149,10 @@ export function useAudioPlayer() {
       store.getState().pause();
     });
     navigator.mediaSession.setActionHandler("previoustrack", () => {
-      store.getState().prev();
+      safePrevTrack();
     });
     navigator.mediaSession.setActionHandler("nexttrack", () => {
-      store.getState().next();
+      safeNextTrack();
     });
     navigator.mediaSession.setActionHandler("seekto", (details) => {
       if (details.seekTime !== undefined) {
@@ -375,27 +390,13 @@ export function useAudioPlayer() {
         if (wheelSwipeTimer) clearTimeout(wheelSwipeTimer);
         wheelSwipeTimer = window.setTimeout(() => {
           if (accumulatedDeltaX > 55) {
-            store.getState().next();
+            safeNextTrack();
           } else if (accumulatedDeltaX < -55) {
-            store.getState().prev();
+            safePrevTrack();
           }
           accumulatedDeltaX = 0;
         }, 70);
       }
-    };
-
-    let lastNavTime = 0;
-    const triggerPrev = () => {
-      const now = Date.now();
-      if (now - lastNavTime < 350) return;
-      lastNavTime = now;
-      store.getState().prev();
-    };
-    const triggerNext = () => {
-      const now = Date.now();
-      if (now - lastNavTime < 350) return;
-      lastNavTime = now;
-      store.getState().next();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -443,12 +444,12 @@ export function useAudioPlayer() {
 
       if (isNextKey) {
         e.preventDefault();
-        triggerNext();
+        safeNextTrack();
         return;
       }
       if (isPrevKey) {
         e.preventDefault();
-        triggerPrev();
+        safePrevTrack();
         return;
       }
       if (isPlayPauseKey) {
@@ -460,13 +461,13 @@ export function useAudioPlayer() {
       // Arrow navigation
       if (e.code === "ArrowLeft") {
         e.preventDefault();
-        if (e.altKey || e.ctrlKey) triggerPrev();
+        if (e.altKey || e.ctrlKey) safePrevTrack();
         else s.seek(Math.max(0, s.currentTime - 5));
         return;
       }
       if (e.code === "ArrowRight") {
         e.preventDefault();
-        if (e.altKey || e.ctrlKey) triggerNext();
+        if (e.altKey || e.ctrlKey) safeNextTrack();
         else s.seek(Math.min(s.duration, s.currentTime + 5));
         return;
       }
@@ -488,11 +489,11 @@ export function useAudioPlayer() {
       if (e.button === 3) {
         e.preventDefault();
         e.stopPropagation();
-        triggerPrev();
+        safePrevTrack();
       } else if (e.button === 4) {
         e.preventDefault();
         e.stopPropagation();
-        triggerNext();
+        safeNextTrack();
       }
     };
 

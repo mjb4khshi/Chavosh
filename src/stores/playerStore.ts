@@ -300,8 +300,9 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       prev: () => {
-        const { queue, queueIndex, currentTime } = get();
-        if (queue.length === 0) return;
+        const { queue, queueIndex, currentTime, shuffle, shuffleQueue } = get();
+        const list = shuffle && shuffleQueue ? shuffleQueue : queue;
+        if (list.length === 0) return;
         if (currentTime > 3) {
           set({ currentTime: 0 });
           return;
