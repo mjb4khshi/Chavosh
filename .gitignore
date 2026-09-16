@@ -1,6 +1,7 @@
 node_modules/
 dist/
 src-tauri/target/
+release_files/
 *.log
 *.tsbuildinfo
 .DS_Store
