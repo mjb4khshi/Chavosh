@@ -12,6 +12,8 @@ dist/
 .eslintcache
 
 # Rust & Tauri Builds
+.cargo/
+src-tauri/.cargo/
 src-tauri/target/
 src-tauri/wix/
 release_files/
