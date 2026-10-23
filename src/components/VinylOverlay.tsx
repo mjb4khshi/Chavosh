@@ -66,7 +66,12 @@ export function VinylOverlay() {
   const setShowSettings = usePlayerStore((s) => s.setShowSettings);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && !(e.target as HTMLElement).closest("button, input, select, textarea, a")) {
+    if (
+      e.button === 0 &&
+      !(e.target as HTMLElement).closest(
+        "button, input, select, textarea, a, [data-no-drag], .cursor-pointer, [role='slider'], [role='button']"
+      )
+    ) {
       startWindowDragging();
     }
   };

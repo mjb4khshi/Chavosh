@@ -43,6 +43,7 @@ export function MiniPlayer() {
   const setVolume = usePlayerStore((s) => s.setVolume);
   const playerMode = usePlayerStore((s) => s.playerMode);
   const setPlayerMode = usePlayerStore((s) => s.setPlayerMode);
+  const setShowNowPlayingOverlay = usePlayerStore((s) => s.setShowNowPlayingOverlay);
   const alwaysOnTop = usePlayerStore((s) => s.alwaysOnTop);
   const toggleAlwaysOnTop = usePlayerStore((s) => s.toggleAlwaysOnTop);
   const coverCache = usePlayerStore((s) => s.coverCache);
@@ -76,20 +77,33 @@ export function MiniPlayer() {
   };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     if (duration <= 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     seek(ratio * duration);
   };
 
-  const handlePin = async () => {
+  const handlePin = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const nextVal = !alwaysOnTop;
     toggleAlwaysOnTop();
     await setAlwaysOnTop(nextVal);
   };
 
+  const restoreLibrary = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setShowNowPlayingOverlay(false);
+    setPlayerMode("library");
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && !(e.target as HTMLElement).closest("button, input, select, a")) {
+    if (
+      e.button === 0 &&
+      !(e.target as HTMLElement).closest(
+        "button, input, select, textarea, a, [data-no-drag], .cursor-pointer, [role='slider'], [role='button']"
+      )
+    ) {
       startWindowDragging();
     }
   };
@@ -116,9 +130,14 @@ export function MiniPlayer() {
           }}
         >
           {/* Hairline Progress Bar at the Bottom Edge */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.06] overflow-hidden">
+          <div
+            onClick={handleSeek}
+            data-no-drag
+            className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/[0.06] overflow-hidden cursor-pointer group/seek"
+            title="Click to seek"
+          >
             <div
-              className="h-full transition-all duration-300"
+              className="h-full transition-all duration-150"
               style={{
                 width: `${progressPercent}%`,
                 background: "var(--primary)",
@@ -128,18 +147,23 @@ export function MiniPlayer() {
           </div>
 
           {/* Left: Spinning Micro-Vinyl Record */}
-          <div className="w-9 h-9 rounded-full relative shrink-0 overflow-hidden flex items-center justify-center vinyl-grooves shadow-lg border border-white/10">
+          <div
+            onClick={restoreLibrary}
+            data-no-drag
+            className="w-9 h-9 rounded-full relative shrink-0 overflow-hidden flex items-center justify-center vinyl-grooves shadow-lg border border-white/10 cursor-pointer"
+            title="Click to restore full library"
+          >
             {cover ? (
               <img
                 src={cover}
                 alt=""
-                className={`w-full h-full rounded-full object-cover ${
+                className={`w-full h-full rounded-full object-cover pointer-events-none ${
                   isPlaying ? "spinning" : "spinning spinning-paused"
                 }`}
               />
             ) : (
               <div
-                className={`w-full h-full rounded-full flex items-center justify-center ${
+                className={`w-full h-full rounded-full flex items-center justify-center pointer-events-none ${
                   isPlaying ? "spinning" : "spinning spinning-paused"
                 }`}
               >
@@ -156,6 +180,7 @@ export function MiniPlayer() {
           {/* Center: Live Soundwave EQ & Track Info / Live Lyric Ticker */}
           <div
             onClick={() => setShowLyricsNano(!showLyricsNano)}
+            data-no-drag
             className="flex-1 min-w-0 flex items-center gap-2 cursor-pointer group/ticker"
             title={currentLyrics ? "Click to toggle Live Lyrics / Track Info" : undefined}
           >
@@ -175,7 +200,7 @@ export function MiniPlayer() {
               />
             </div>
 
-            <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="min-w-0 flex-1 overflow-hidden pointer-events-none">
               <AnimatePresence mode="wait" initial={false}>
                 {showLyricsNano && currentLyricLine ? (
                   <motion.div
@@ -220,9 +245,10 @@ export function MiniPlayer() {
           </div>
 
           {/* Right: Micro Controls */}
-          <div className="flex items-center gap-0.5 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0" data-no-drag>
             <button
-              onClick={prev}
+              onClick={(e) => { e.stopPropagation(); prev(); }}
+              data-no-drag
               className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 text-white/80 hover:text-white transition-colors cursor-pointer"
               title="Previous"
             >
@@ -230,7 +256,8 @@ export function MiniPlayer() {
             </button>
 
             <button
-              onClick={togglePlay}
+              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+              data-no-drag
               className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-md mx-0.5 cursor-pointer"
               style={{
                 background: "var(--primary)",
@@ -243,7 +270,8 @@ export function MiniPlayer() {
             </button>
 
             <button
-              onClick={next}
+              onClick={(e) => { e.stopPropagation(); next(); }}
+              data-no-drag
               className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 text-white/80 hover:text-white transition-colors cursor-pointer"
               title="Next"
             >
@@ -252,6 +280,7 @@ export function MiniPlayer() {
 
             <button
               onClick={handlePin}
+              data-no-drag
               className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors ml-0.5 cursor-pointer"
               style={{
                 color: alwaysOnTop ? "var(--primary)" : "rgba(255,255,255,0.45)",
@@ -262,7 +291,8 @@ export function MiniPlayer() {
             </button>
 
             <button
-              onClick={() => setPlayerMode("library")}
+              onClick={restoreLibrary}
+              data-no-drag
               className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
               title="Expand to Full Library"
             >
@@ -270,7 +300,8 @@ export function MiniPlayer() {
             </button>
 
             <button
-              onClick={() => closeWindow()}
+              onClick={(e) => { e.stopPropagation(); closeWindow(); }}
+              data-no-drag
               className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-500/80 text-white/50 hover:text-white transition-colors cursor-pointer"
               title="Close"
             >
@@ -312,7 +343,12 @@ export function MiniPlayer() {
         />
 
         {/* Left: High-Res Album Cover / Stylized Vinyl Hub with Ambient Backlight Glow */}
-        <div className="relative shrink-0">
+        <div
+          onClick={restoreLibrary}
+          data-no-drag
+          className="relative shrink-0 cursor-pointer"
+          title="Click to restore full library"
+        >
           {/* Ambient Glow */}
           {cover ? (
             <div
@@ -366,6 +402,7 @@ export function MiniPlayer() {
           <div className="flex items-start justify-between gap-2">
             <div
               className="min-w-0 flex-1 cursor-pointer"
+              data-no-drag
               onClick={() => setShowLyricsMini(!showLyricsMini)}
               title="Click to toggle Lyrics / Title"
             >
@@ -439,10 +476,11 @@ export function MiniPlayer() {
             </div>
 
             {/* Window control icons capsule */}
-            <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm shrink-0">
+            <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm shrink-0" data-no-drag>
               <button
-                onClick={() => setShowLyricsMini(!showLyricsMini)}
-                className="w-5.5 h-5.5 rounded-md flex items-center justify-center transition-colors cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setShowLyricsMini(!showLyricsMini); }}
+                data-no-drag
+                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors cursor-pointer"
                 style={{
                   color: showLyricsMini ? "var(--primary, #0066a4)" : "rgba(255,255,255,0.45)",
                   background: showLyricsMini
@@ -451,11 +489,12 @@ export function MiniPlayer() {
                 }}
                 title={showLyricsMini ? "Show Track Info" : "Live Dual-Line Lyrics"}
               >
-                <Mic2 size={10.5} />
+                <Mic2 size={11} />
               </button>
               <button
                 onClick={handlePin}
-                className="w-5.5 h-5.5 rounded-md flex items-center justify-center transition-colors cursor-pointer"
+                data-no-drag
+                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors cursor-pointer"
                 style={{
                   color: alwaysOnTop ? "var(--primary, #0066a4)" : "rgba(255,255,255,0.45)",
                   background: alwaysOnTop
@@ -464,18 +503,20 @@ export function MiniPlayer() {
                 }}
                 title={alwaysOnTop ? "Always On Top: ON" : "Pin Always on Top"}
               >
-                <Pin size={10.5} className={alwaysOnTop ? "rotate-45 fill-current" : ""} />
+                <Pin size={11} className={alwaysOnTop ? "rotate-45 fill-current" : ""} />
               </button>
               <button
-                onClick={() => setPlayerMode("library")}
-                className="w-5.5 h-5.5 rounded-md flex items-center justify-center hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
+                onClick={restoreLibrary}
+                data-no-drag
+                className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
                 title="Restore Full Library"
               >
-                <Maximize2 size={10.5} />
+                <Maximize2 size={11} />
               </button>
               <button
-                onClick={() => closeWindow()}
-                className="w-5.5 h-5.5 rounded-md flex items-center justify-center hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-colors cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); closeWindow(); }}
+                data-no-drag
+                className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-colors cursor-pointer"
                 title="Close"
               >
                 <X size={11} />
@@ -484,10 +525,11 @@ export function MiniPlayer() {
           </div>
 
           {/* Middle Row: Scrubber Timeline */}
-          <div className="flex items-center gap-2 text-[9.5px] font-mono text-white/45">
+          <div className="flex items-center gap-2 text-[9.5px] font-mono text-white/45" data-no-drag>
             <span className="w-6 text-right tabular-nums">{formatTime(currentTime)}</span>
             <div
               onClick={handleSeek}
+              data-no-drag
               className="flex-1 h-3 flex items-center cursor-pointer group/scrub relative py-1"
             >
               <div className="w-full h-1 group-hover/scrub:h-1.5 bg-white/[0.12] rounded-full overflow-hidden relative transition-all duration-200">
@@ -514,11 +556,12 @@ export function MiniPlayer() {
           </div>
 
           {/* Bottom Row: Playback Controls & Volume Slider */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" data-no-drag>
             {/* Playback buttons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" data-no-drag>
               <button
-                onClick={toggleShuffle}
+                onClick={(e) => { e.stopPropagation(); toggleShuffle(); }}
+                data-no-drag
                 className="w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer"
                 style={{
                   color: shuffle ? "var(--primary, #0066a4)" : "rgba(255,255,255,0.4)",
@@ -532,15 +575,17 @@ export function MiniPlayer() {
               </button>
 
               <button
-                onClick={prev}
-                className="w-6.5 h-6.5 rounded-lg flex items-center justify-center hover:bg-white/10 text-white/75 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
+                onClick={(e) => { e.stopPropagation(); prev(); }}
+                data-no-drag
+                className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 text-white/75 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
                 title="Previous Track"
               >
                 <IconsaxPrevious size={13} />
               </button>
 
               <button
-                onClick={togglePlay}
+                onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                data-no-drag
                 className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-108 active:scale-95 shadow-lg mx-0.5 cursor-pointer"
                 style={{
                   background:
@@ -555,15 +600,17 @@ export function MiniPlayer() {
               </button>
 
               <button
-                onClick={next}
-                className="w-6.5 h-6.5 rounded-lg flex items-center justify-center hover:bg-white/10 text-white/75 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
+                onClick={(e) => { e.stopPropagation(); next(); }}
+                data-no-drag
+                className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 text-white/75 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
                 title="Next Track"
               >
                 <IconsaxNext size={13} />
               </button>
 
               <button
-                onClick={cycleRepeat}
+                onClick={(e) => { e.stopPropagation(); cycleRepeat(); }}
+                data-no-drag
                 className="w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer"
                 style={{
                   color: repeat !== "off" ? "var(--primary, #0066a4)" : "rgba(255,255,255,0.4)",
@@ -585,9 +632,10 @@ export function MiniPlayer() {
             </div>
 
             {/* Sleek Custom Volume Slider */}
-            <div className="flex items-center gap-1.5 pl-2">
+            <div className="flex items-center gap-1.5 pl-2" data-no-drag>
               <button
-                onClick={() => setVolume(volume > 0 ? 0 : 0.85)}
+                onClick={(e) => { e.stopPropagation(); setVolume(volume > 0 ? 0 : 0.85); }}
+                data-no-drag
                 className="text-white/45 hover:text-white transition-colors cursor-pointer flex items-center justify-center p-1 rounded-md hover:bg-white/10"
                 title={volume === 0 ? "Unmute" : `Volume: ${Math.round(volume * 100)}%`}
               >
@@ -601,14 +649,16 @@ export function MiniPlayer() {
               </button>
               <div
                 onClick={(e) => {
+                  e.stopPropagation();
                   const rect = e.currentTarget.getBoundingClientRect();
                   const val = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                   setVolume(Math.round(val * 100) / 100);
                 }}
+                data-no-drag
                 className="w-16 h-3 flex items-center cursor-pointer group/vol relative py-1"
                 title={`Volume: ${Math.round(volume * 100)}%`}
               >
-                <div className="w-full h-1 group-hover/vol:h-1.5 bg-white/[0.12] rounded-full overflow-hidden relative transition-all duration-200">
+                <div className="w-full h-1 group-hover/vol:h-1.5 bg-white/[0.12] rounded-full overflow-hidden relative transition-all duration-200 pointer-events-none">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{

@@ -16,8 +16,6 @@
         "title": "Chavosh",
         "width": 1180,
         "height": 780,
-        "minWidth": 840,
-        "minHeight": 580,
         "decorations": false,
         "transparent": true,
         "shadow": false,

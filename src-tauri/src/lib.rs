@@ -153,6 +153,7 @@ fn clear_library(state: State<'_, LibraryState>) -> Result<(), String> {
 
 #[tauri::command]
 fn resize_window(width: f64, height: f64, window: tauri::Window) -> Result<(), String> {
+    let _ = window.set_min_size(None);
     window
         .set_size(tauri::Size::Logical(tauri::LogicalSize::new(width, height)))
         .map_err(|e| e.to_string())

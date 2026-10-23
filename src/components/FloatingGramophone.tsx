@@ -122,7 +122,12 @@ export function FloatingGramophone() {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && !(e.target as HTMLElement).closest("button, a, .scrubber-ring")) {
+    if (
+      e.button === 0 &&
+      !(e.target as HTMLElement).closest(
+        "button, a, input, select, textarea, [data-no-drag], .cursor-pointer, [role='slider'], [role='button'], .scrubber-ring"
+      )
+    ) {
       startWindowDragging();
     }
   };
