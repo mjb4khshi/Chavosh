@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { RotateCw } from "lucide-react";
+import { RotateCw, Sparkles } from "lucide-react";
 import {
   IconsaxMusic,
   IconsaxCd,
@@ -11,6 +11,7 @@ import {
   IconsaxSetting,
 } from "./Iconsax";
 import { usePlayerStore, type Track, type LibraryTab } from "../stores/playerStore";
+import { isTauri, parseAudioFiles, loadSampleTracks } from "../utils/browserAudio";
 import SarvBadge from "./sarv/SarvBadge";
 import SarvButton from "./sarv/SarvButton";
 
@@ -32,8 +33,13 @@ export function Sidebar() {
 
   const uniqueAlbums = new Set(tracks.map((t) => t.album)).size;
   const uniqueArtists = new Set(tracks.map((t) => t.artist)).size;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleAddFolder = async () => {
+    if (!isTauri()) {
+      fileInputRef.current?.click();
+      return;
+    }
     try {
       const selected = await open({ directory: true, multiple: true });
       if (!selected) return;
@@ -43,7 +49,8 @@ export function Sidebar() {
       addTracks(newTracks);
       setFolders([...new Set([...folders, ...paths])]);
     } catch (e) {
-      console.error("Failed to scan folders:", e);
+      console.error("Failed to scan folders via Tauri:", e);
+      fileInputRef.current?.click();
     } finally {
       setScanning(false);
     }
@@ -187,7 +194,25 @@ export function Sidebar() {
           )}
         </div>
 
-        <div className="p-1 pt-1.5 border-t border-base-content/[0.08]">
+        <div className="p-1 pt-1.5 border-t border-base-content/[0.08] flex flex-col gap-1.5">
+          <input
+            type="file"
+            ref={fileInputRef}
+            multiple
+            accept="audio/*"
+            className="hidden"
+            onChange={async (e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                setScanning(true);
+                try {
+                  await parseAudioFiles(e.target.files);
+                } finally {
+                  setScanning(false);
+                  e.target.value = "";
+                }
+              }
+            }}
+          />
           <SarvButton
             variant="soft"
             styleType="soft"
@@ -197,8 +222,18 @@ export function Sidebar() {
             className="w-full gap-1.5"
             icon={<IconsaxFolder size={14} />}
           >
-            Add Folder
+            {isTauri() ? "Add Folder" : "Add Music Files"}
           </SarvButton>
+          {!isTauri() && (
+            <button
+              type="button"
+              onClick={() => loadSampleTracks()}
+              className="text-[10px] text-base-content/50 hover:text-[var(--theme-color-primary,#0066a4)] py-1 flex items-center justify-center gap-1 transition-colors cursor-pointer"
+            >
+              <Sparkles size={11} />
+              <span>Load Demo Tracks</span>
+            </button>
+          )}
         </div>
       </div>
 

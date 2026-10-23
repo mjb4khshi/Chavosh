@@ -31,17 +31,36 @@ jobs:
       - name: Setup Rust stable
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
       - name: Install dependencies
         run: npm ci
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: v__VERSION__
           releaseName: 'Chavosh v__VERSION__'
-          releaseBody: 'See the assets to download the release installer.'
+          releaseBody: |
+            ## 🎵 Chavosh (چاووش) v__VERSION__
+
+            A modern, ultra-smooth desktop audio player built with **Tauri v2**, **Rust**, and **Sarv UI**.
+
+            ### ✨ Highlights in this Release:
+            - **Karaoke Synced Lyrics**: Real-time synchronized karaoke lyrics with `.lrc` parsing, embedded tag extraction, and automatic search across LRCLIB and YouTube Captions.
+            - **Audiophile Liquid Wave Equalizer**: Dynamic 64-band FFT undulating wave ribbon closely hugging the vinyl rim, synced with cover artwork hues.
+            - **Kick Transient Beat Pulse**: Intelligent transient flux onset detection delivering an authentic speaker-cone thump on kick drum beats.
+            - **Dual-Deck Gapless Crossfade**: Seamless DJ-grade transitions between tracks with zero audio gaps or stutters.
+            - **Sarv UI 0.3.1 Design System**: 8 handcrafted themes, frosted glass typography, and customizable text scaling.
+
+            ### 📦 Download Assets:
+            - **Windows Setup Installer (`.exe`)**: `Chavosh___VERSION___x64-setup.exe` *(Recommended)*
+            - **Windows MSI Package (`.msi`)**: `Chavosh___VERSION___x64_en-US.msi`
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

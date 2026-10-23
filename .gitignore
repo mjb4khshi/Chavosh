@@ -1,7 +1,45 @@
+# Binaries & Installers
+*.exe
+*.msi
+*.zip
+*.7z
+*.tar.gz
+
+# Node & Dependencies
 node_modules/
 dist/
+.turbo/
+.eslintcache
+
+# Rust & Tauri Builds
 src-tauri/target/
+src-tauri/wix/
 release_files/
+target/
+
+# Logs & Temporary Files
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 *.tsbuildinfo
+*.tmp
+*.dmp
+*.wer
+run.log
+
+# System & OS Files
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Antigravity & Agent Artifacts / Internal Workspace Cache
+.system_generated/
+scratch/

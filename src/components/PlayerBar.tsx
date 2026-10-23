@@ -1,7 +1,10 @@
+import { useState } from "react";
 import {
   Heart,
   ListMusic,
   Zap,
+  Mic2,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   IconsaxPlay,
@@ -20,12 +23,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePlayerStore, selectCurrentTrack } from "../stores/playerStore";
 import { formatTime } from "../utils/format";
 import SarvBadge from "./sarv/SarvBadge";
+import { CoverEditModal } from "./CoverEditModal";
 
 /**
  * Sarv UI Spacing System (4px grid)
  * PlayerBar: h-20 (80px) - px-4 - fixed wings w-56 + fluid center
  */
 export function PlayerBar() {
+  const [showCoverModal, setShowCoverModal] = useState(false);
   const currentTrack = usePlayerStore(selectCurrentTrack);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const togglePlay = usePlayerStore((s) => s.togglePlay);
@@ -46,6 +51,8 @@ export function PlayerBar() {
   const setShowNowPlayingOverlay = usePlayerStore((s) => s.setShowNowPlayingOverlay);
   const showQueueDrawer = usePlayerStore((s) => s.showQueueDrawer);
   const toggleQueueDrawer = usePlayerStore((s) => s.toggleQueueDrawer);
+  const showLyrics = usePlayerStore((s) => s.showLyrics);
+  const toggleLyrics = usePlayerStore((s) => s.toggleLyrics);
   const queue = usePlayerStore((s) => s.queue);
   const queueIndex = usePlayerStore((s) => s.queueIndex);
   const shuffleQueue = usePlayerStore((s) => s.shuffleQueue);
@@ -116,6 +123,21 @@ export function PlayerBar() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Quick Edit Cover Button on hover */}
+          {currentTrack && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCoverModal(true);
+              }}
+              className="absolute top-0 right-0 p-1 bg-black/85 hover:bg-black text-white/80 hover:text-white rounded-bl-md opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-pointer shadow-md"
+              title="تغییر یا اصلاح کاور / Fix Cover"
+            >
+              <ImageIcon size={10} />
+            </button>
+          )}
         </div>
 
         <div className="min-w-0 flex-1 relative overflow-hidden">
@@ -267,6 +289,31 @@ export function PlayerBar() {
 
         <button
           type="button"
+          onClick={toggleLyrics}
+          className={`h-8 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+            showLyrics
+              ? "bg-base-content text-base-900"
+              : "text-base-content/60 hover:text-base-content hover:bg-base-content/[0.08]"
+          }`}
+          style={{
+            background: showLyrics
+              ? "color-mix(in oklab, var(--primary, var(--theme-color-primary, #0066a4)) 22%, transparent)"
+              : undefined,
+            color: showLyrics
+              ? "var(--primary, var(--theme-color-primary, #0066a4))"
+              : undefined,
+            border: showLyrics
+              ? "1px solid var(--primary, var(--theme-color-primary, #0066a4))"
+              : undefined,
+          }}
+          title="Toggle Synchronized Lyrics (Ctrl+L)"
+        >
+          <Mic2 size={14} />
+          <span className="hidden xl:inline text-[11px] font-bold">Lyrics</span>
+        </button>
+
+        <button
+          type="button"
           onClick={toggleQueueDrawer}
           className={`h-8 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
             showQueueDrawer
@@ -326,6 +373,15 @@ export function PlayerBar() {
           />
         </div>
       </div>
+
+      {/* Cover Edit Modal for Current Track */}
+      {showCoverModal && currentTrack && (
+        <CoverEditModal
+          track={currentTrack}
+          currentCover={cover}
+          onClose={() => setShowCoverModal(false)}
+        />
+      )}
     </div>
   );
 }

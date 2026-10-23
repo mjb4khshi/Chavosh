@@ -5,7 +5,7 @@ export default function SarvSelect({
   value,
   onChange,
   options = [], // [{ value: '...', label: '...', icon: '...', description: '...' }]
-  placeholder = 'انتخاب کنید...',
+  placeholder = 'Select...',
   variant = 'primary',
   className = '',
   size = 'md', // sm, md, lg

@@ -6,6 +6,9 @@ import {
   Plus,
   Zap,
   ListMusic,
+  Mic2,
+  Sparkles,
+  Activity,
 } from "lucide-react";
 import {
   IconsaxPlay,
@@ -25,6 +28,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePlayerStore, selectCurrentTrack } from "../stores/playerStore";
 import { startWindowDragging, setAlwaysOnTop, closeWindow, resizeWindow } from "../utils/window";
 import { formatTime } from "../utils/format";
+import { findActiveLyricIndex } from "../utils/lyrics";
+import { LiquidWaveVisualizer } from "./LiquidWaveVisualizer";
+import { useVisualizerFrame } from "../hooks/useVisualizerFrame";
 
 export function FloatingGramophone() {
   const currentTrack = usePlayerStore(selectCurrentTrack);
@@ -57,6 +63,17 @@ export function FloatingGramophone() {
   const coverCache = usePlayerStore((s) => s.coverCache);
   const gramophoneScale = usePlayerStore((s) => s.gramophoneScale);
   const setGramophoneScale = usePlayerStore((s) => s.setGramophoneScale);
+  const currentLyrics = usePlayerStore((s) => s.currentLyrics);
+
+  const visualizerEnabled = settings.vinylVisualizerEnabled ?? true;
+  const beatPulseEnabled = settings.vinylBeatPulseEnabled ?? true;
+  const isAudioFrameActive = visualizerEnabled || beatPulseEnabled;
+  const visualizerFrame = useVisualizerFrame(isPlaying, isAudioFrameActive);
+  const beatPulse = visualizerFrame.beatPulse || 0;
+  const gramophonePulseScale =
+    isPlaying && beatPulseEnabled
+      ? 1 + beatPulse * 0.125
+      : 1;
 
   const [isHovering, setIsHovering] = useState(false);
   const [isCenterHovering, setIsCenterHovering] = useState(false);
@@ -64,8 +81,18 @@ export function FloatingGramophone() {
   const [isDraggingScrubber, setIsDraggingScrubber] = useState(false);
   const [showTimeTooltip, setShowTimeTooltip] = useState(false);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [showLyricPill, setShowLyricPill] = useState(true);
 
   const scrubberRef = useRef<HTMLDivElement | null>(null);
+
+  const activeLyricIndex =
+    currentLyrics && currentLyrics.synced
+      ? findActiveLyricIndex(currentLyrics.lines, currentTime)
+      : -1;
+  const currentLyricLine =
+    currentLyrics && activeLyricIndex >= 0
+      ? currentLyrics.lines[activeLyricIndex]
+      : null;
 
   const cover = currentTrack ? coverCache[currentTrack.path] : null;
   const coverKey = currentTrack?.path ?? "chavosh-placeholder";
@@ -154,6 +181,7 @@ export function FloatingGramophone() {
 
   return (
     <div
+      dir="ltr"
       onMouseDown={handleMouseDown}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => {
@@ -162,7 +190,7 @@ export function FloatingGramophone() {
         setHoveredSide(null);
         setIsDraggingScrubber(false);
       }}
-      className="w-full h-full flex items-center justify-center select-none relative group p-2"
+      className="w-full h-full flex flex-col items-center justify-center select-none relative group p-2 overflow-hidden"
       style={
         {
           background: "transparent",
@@ -171,35 +199,29 @@ export function FloatingGramophone() {
       }
     >
       {/* Floating Top Controls Pill (Hover) - with Shuffle, Remix, Queue & Settings */}
-      <div className="absolute top-2.5 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl max-w-[95%]">
-        {/* Style Switcher (CD / Vinyl) */}
-        <button
-          onClick={() => setPlayerStyle(playerStyle === "vinyl" ? "cd" : "vinyl")}
-          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold transition-colors text-white hover:bg-white/20 cursor-pointer"
-          title={playerStyle === "vinyl" ? "Switch to CD" : "Switch to Vinyl"}
-        >
-          <IconsaxCd size={13} style={{ color: "var(--primary, var(--theme-color-primary, #0066a4))" }} />
-          <span className="uppercase text-[10px]">{playerStyle}</span>
-        </button>
-
-        <div className="w-px h-3 bg-white/20 shrink-0" />
-
+      <div
+        className="absolute top-2 left-0 right-0 mx-auto w-fit z-40 flex items-center justify-center gap-1 px-2.5 py-1 rounded-full bg-black/85 backdrop-blur-xl border border-white/15 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl max-w-[calc(100%-20px)]"
+        style={{
+          transform: "scale(clamp(0.68, min(100vw, 100vh) / 365, 1))",
+          transformOrigin: "top center",
+        }}
+      >
         {/* Shuffle Button */}
         <button
           onClick={toggleShuffle}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer shrink-0"
           style={{
             color: shuffle ? "var(--primary, var(--theme-color-primary, #0066a4))" : "rgba(255, 255, 255, 0.7)",
           }}
           title={shuffle ? "Smart Shuffle: ON" : "Smart Shuffle: OFF"}
         >
-          <IconsaxShuffle size={13} />
+          <IconsaxShuffle size={12} />
         </button>
 
         {/* Repeat Button */}
         <button
           onClick={cycleRepeat}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer relative"
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer relative shrink-0"
           style={{
             color: repeat !== "off" ? "var(--primary, var(--theme-color-primary, #0066a4))" : "rgba(255, 255, 255, 0.7)",
           }}
@@ -211,12 +233,12 @@ export function FloatingGramophone() {
               : "Repeat: OFF"
           }
         >
-          {repeat === "one" ? <IconsaxRepeatOne size={13} /> : <IconsaxRepeat size={13} />}
+          {repeat === "one" ? <IconsaxRepeatOne size={12} /> : <IconsaxRepeat size={12} />}
         </button>
 
         {/* Volume Control Button & Popover Slider */}
         <div
-          className="relative flex items-center"
+          className="relative flex items-center shrink-0"
           onMouseEnter={() => setShowVolumeSlider(true)}
           onMouseLeave={() => setShowVolumeSlider(false)}
           onWheel={(e) => {
@@ -235,11 +257,11 @@ export function FloatingGramophone() {
             title={volume === 0 ? "Unmute" : `Volume: ${Math.round(volume * 100)}%`}
           >
             {volume === 0 ? (
-              <IconsaxVolumeCross size={13} />
+              <IconsaxVolumeCross size={12} />
             ) : volume < 0.45 ? (
-              <IconsaxVolumeLow size={13} />
+              <IconsaxVolumeLow size={12} />
             ) : (
-              <IconsaxVolumeHigh size={13} />
+              <IconsaxVolumeHigh size={12} />
             )}
           </button>
 
@@ -266,28 +288,28 @@ export function FloatingGramophone() {
         {/* Remix Mode Button */}
         <button
           onClick={() => updateSettings({ remixEnabled: !settings.remixEnabled })}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center gap-0.5"
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center gap-0.5 shrink-0"
           style={{
             color: settings.remixEnabled ? "#f59e0b" : "rgba(255, 255, 255, 0.7)",
           }}
           title={settings.remixEnabled ? "Remix Engine: ON" : "Enable Remix Engine"}
         >
-          <Zap size={12} className={settings.remixEnabled ? "fill-current" : ""} />
+          <Zap size={11} className={settings.remixEnabled ? "fill-current" : ""} />
         </button>
 
         {/* Play Queue / Playlist Button */}
         <button
           onClick={toggleQueueDrawer}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center gap-1"
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center gap-1 shrink-0"
           style={{
             color: showQueueDrawer ? "var(--primary, var(--theme-color-primary, #0066a4))" : "rgba(255, 255, 255, 0.7)",
           }}
           title="Toggle Play Queue"
         >
-          <ListMusic size={13} />
+          <ListMusic size={12} />
           {upcomingCount > 0 && (
             <span
-              className="text-[9px] font-mono px-1 rounded-full font-bold"
+              className="text-[8px] font-mono px-1 rounded-full font-bold"
               style={{
                 background: "var(--primary, var(--theme-color-primary, #0066a4))",
                 color: "var(--theme-color-primary-content, #fff)",
@@ -298,24 +320,91 @@ export function FloatingGramophone() {
           )}
         </button>
 
+        {/* Live Lyrics Pill Toggle */}
+        <button
+          onClick={() => setShowLyricPill(!showLyricPill)}
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+          style={{
+            color: showLyricPill
+              ? "var(--primary, var(--theme-color-primary, #0066a4))"
+              : "rgba(255, 255, 255, 0.65)",
+            background: showLyricPill
+              ? "color-mix(in oklab, var(--primary, var(--theme-color-primary, #0066a4)) 22%, transparent)"
+              : "transparent",
+          }}
+          title={showLyricPill ? "Hide Live Lyrics" : "Show Live Lyrics"}
+        >
+          <Mic2 size={11} />
+        </button>
+
+        {/* Audio Visualizer Ring Toggle */}
+        <button
+          onClick={() =>
+            updateSettings({
+              vinylVisualizerEnabled: !visualizerEnabled,
+            })
+          }
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+          style={{
+            color: visualizerEnabled
+              ? "var(--primary, var(--theme-color-primary, #0066a4))"
+              : "rgba(255, 255, 255, 0.5)",
+            background: visualizerEnabled
+              ? "color-mix(in oklab, var(--primary, var(--theme-color-primary, #0066a4)) 22%, transparent)"
+              : "transparent",
+          }}
+          title={
+            visualizerEnabled
+              ? "اکولایزر دیسک: روشن (کلیک برای خاموش کردن) / Visualizer: ON"
+              : "اکولایزر دیسک: خاموش (کلیک برای روشن کردن) / Visualizer: OFF"
+          }
+        >
+          <Sparkles size={11} />
+        </button>
+
+        {/* Beat Pulse Effect Toggle */}
+        <button
+          onClick={() =>
+            updateSettings({
+              vinylBeatPulseEnabled: !beatPulseEnabled,
+            })
+          }
+          className="p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+          style={{
+            color: beatPulseEnabled
+              ? "var(--primary, var(--theme-color-primary, #0066a4))"
+              : "rgba(255, 255, 255, 0.5)",
+            background: beatPulseEnabled
+              ? "color-mix(in oklab, var(--primary, var(--theme-color-primary, #0066a4)) 22%, transparent)"
+              : "transparent",
+          }}
+          title={
+            beatPulseEnabled
+              ? "افکت ضرب‌آهنگ دیسک: روشن (کلیک برای خاموش کردن) / Beat Pulse: ON"
+              : "افکت ضرب‌آهنگ دیسک: خاموش (کلیک برای روشن کردن) / Beat Pulse: OFF"
+          }
+        >
+          <Activity size={11} />
+        </button>
+
         <div className="w-px h-3 bg-white/20 shrink-0" />
 
         {/* Disc size manual control */}
-        <div className="flex items-center gap-0.5 shrink-0" title="Gramophone Disc Scale">
+        <div className="flex items-center gap-0.5 shrink-0 px-1 py-0.5 rounded-full bg-white/5 border border-white/10" title="Gramophone Disc Scale">
           <button
             onClick={() => stepScale(-0.05)}
-            className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white cursor-pointer"
+            className="w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white cursor-pointer"
           >
-            <Minus size={10} />
+            <Minus size={9} />
           </button>
-          <span className="w-8 text-center text-[9px] font-bold font-mono text-white/85 tabular-nums">
+          <span className="w-6 text-center text-[8.5px] font-bold font-mono text-white/85 tabular-nums">
             {Math.round(gramophoneScale * 100)}%
           </span>
           <button
             onClick={() => stepScale(0.05)}
-            className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white cursor-pointer"
+            className="w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white cursor-pointer"
           >
-            <Plus size={10} />
+            <Plus size={9} />
           </button>
         </div>
 
@@ -324,7 +413,7 @@ export function FloatingGramophone() {
         {/* Pin Always on Top */}
         <button
           onClick={handlePin}
-          className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer"
+          className="w-4.5 h-4.5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer shrink-0"
           style={{ color: alwaysOnTop ? "var(--primary, var(--theme-color-primary, #0066a4))" : "white" }}
           title={alwaysOnTop ? "Unpin Window" : "Pin Always on Top"}
         >
@@ -334,24 +423,65 @@ export function FloatingGramophone() {
         {/* Return to Library */}
         <button
           onClick={() => setPlayerMode("library")}
-          className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white cursor-pointer"
+          className="w-4.5 h-4.5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white cursor-pointer shrink-0"
           title="Return to Library Window"
         >
-          <IconsaxCategory size={11} />
+          <IconsaxCategory size={10} />
         </button>
 
         {/* Close Window */}
         <button
           onClick={() => closeWindow()}
-          className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors text-white cursor-pointer"
+          className="w-4.5 h-4.5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors text-white cursor-pointer shrink-0"
           title="Close"
         >
-          <X size={11} />
+          <X size={10} />
         </button>
       </div>
 
-      {/* STATIC disc wrapper — very light & soft drop shadow lives here so it NEVER rotates */}
-      <div className="relative flex items-center justify-center disc-shadow rounded-full disc-stage">
+      {/* STATIC disc wrapper — with smooth beat pulse effect */}
+      <div
+        className="relative flex items-center justify-center disc-shadow rounded-full disc-stage overflow-visible transform-gpu"
+        style={{
+          transform: `scale(${gramophonePulseScale})`,
+        }}
+      >
+        {/* Dynamic Ambient Halo & Responsive Liquid Wave Ring (Toggled via settings.vinylVisualizerEnabled) */}
+        {visualizerEnabled && (
+          <>
+            <div
+              className="absolute rounded-full pointer-events-none transition-all duration-200 ease-out"
+              style={{
+                width: "128%",
+                height: "128%",
+                top: "-14%",
+                left: "-14%",
+                background:
+                  "radial-gradient(circle, color-mix(in srgb, var(--primary, #00d2ff) 50%, transparent) 0%, color-mix(in srgb, var(--primary, #00d2ff) 18%, transparent) 55%, transparent 75%)",
+                filter: `blur(${16 + beatPulse * 16}px)`,
+                opacity: isPlaying ? 0.68 + beatPulse * 0.32 : 0.22,
+                zIndex: 0,
+              }}
+            />
+            <div
+              className="absolute pointer-events-none overflow-visible"
+              style={{
+                width: "140%",
+                height: "140%",
+                top: "-20%",
+                left: "-20%",
+                zIndex: 15,
+              }}
+            >
+              <LiquidWaveVisualizer
+                frame={visualizerFrame}
+                isPlaying={isPlaying}
+                responsive
+              />
+            </div>
+          </>
+        )}
+
         {/* ── ROTATING DISC GROOVES (Spins when playing) ── */}
         <div
           className={`w-full h-full rounded-full absolute inset-0 overflow-hidden ${
@@ -588,32 +718,32 @@ export function FloatingGramophone() {
           </button>
         </div>
 
-        {/* ── REALISTIC MECHANICAL TONEARM (Vinyl only, dynamically scales with window) ── */}
+        {/* ── REALISTIC MECHANICAL TONEARM (Vinyl only, stays neatly framed inside disc) ── */}
         {playerStyle === "vinyl" && (
           <div
-            className="absolute top-1 right-2 pointer-events-none z-30 transition-transform duration-300"
+            className="absolute top-2 right-3 pointer-events-none z-30 transition-transform duration-300"
             style={{
-              transform: "scale(clamp(0.65, min(100vw, 100vh) / 360, 1.35))",
+              transform: "scale(clamp(0.65, min(100vw, 100vh) / 360, 1.25))",
               transformOrigin: "top right",
             }}
           >
             {/* Pivot Base */}
             <div
-              className="w-12 h-12 rounded-full relative shadow-xl border border-white/10"
+              className="w-11 h-11 rounded-full relative shadow-xl border border-white/10"
               style={{
                 background: "radial-gradient(circle, #555562 0%, #15151e 100%)",
               }}
             >
-              <div className="w-4 h-4 rounded-full bg-[#0e0e14] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/10" />
+              <div className="w-3.5 h-3.5 rounded-full bg-[#0e0e14] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/10" />
             </div>
 
-            {/* Arm Tube */}
+            {/* Arm Tube: playing rests on music groove (-12deg), paused rests tucked safely within boundary (-32deg) */}
             <div
-              className="absolute top-6 right-6 origin-[100%_50%] transition-transform duration-700 ease-out"
+              className="absolute top-5.5 right-5.5 origin-[100%_50%] transition-transform duration-700 ease-out"
               style={{
-                width: "140px",
-                height: "4.5px",
-                transform: `rotate(${isPlaying ? "-10deg" : "28deg"})`,
+                width: "122px",
+                height: "4px",
+                transform: `rotate(${isPlaying ? "-12deg" : "-32deg"})`,
               }}
             >
               <div
@@ -625,7 +755,7 @@ export function FloatingGramophone() {
               />
               {/* Headshell & Cartridge with Primary Accent Border */}
               <div
-                className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-6 h-4 rounded-sm border-l-2"
+                className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-5 h-3.5 rounded-sm border-l-2"
                 style={{
                   background: "linear-gradient(135deg, #2d3436 0%, #636e72 100%)",
                   borderColor: "var(--primary, var(--theme-color-primary, #0066a4))",
@@ -635,6 +765,34 @@ export function FloatingGramophone() {
           </div>
         )}
       </div>
+
+      {/* ── FLOATING LIVE LYRIC SUBTITLE PILL (Underneath the turntable, perfectly centered with smooth motion) ── */}
+      {showLyricPill && currentLyricLine && (
+        <div
+          className="absolute bottom-2.5 left-0 right-0 mx-auto w-fit px-3.5 py-1 rounded-full flex items-center justify-center shadow-xl pointer-events-none z-50 animate-fadeIn border border-white/20 max-w-[calc(100%-24px)] overflow-hidden"
+          style={{
+            background: "rgba(10, 11, 16, 0.94)",
+            backdropFilter: "blur(20px)",
+            boxShadow: "0 4px 18px -2px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08)",
+            transform: "scale(clamp(0.72, min(100vw, 100vh) / 360, 1))",
+            transformOrigin: "bottom center",
+          }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={`${currentLyricLine.id}-${currentLyricLine.text}`}
+              initial={{ opacity: 0, y: 7, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -7, scale: 0.96 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="text-[11px] font-black text-white truncate max-w-[240px] drop-shadow-sm text-center block"
+              dir="auto"
+            >
+              {currentLyricLine.text}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

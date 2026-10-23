@@ -2,6 +2,44 @@ import { useEffect, useRef, useCallback } from "react";
 import { usePlayerStore, selectCurrentTrack } from "../stores/playerStore";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { getTrackCover } from "../utils/window";
+import { loadTrackCover } from "../utils/coverLoader";
+import { isTauri } from "../utils/browserAudio";
+import { attachAudioToAnalyser, resumeAudioContext } from "../utils/audioVisualizer";
+
+export function toAudioSrc(path: string): string {
+  if (!path) return "/audio/chavosh-ambient.wav";
+  if (
+    path.startsWith("blob:") ||
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:") ||
+    path.startsWith("/audio/") ||
+    path.startsWith("/") ||
+    path.startsWith("./")
+  ) {
+    return path;
+  }
+  if (!isTauri()) {
+    // In browser mode, Windows paths (like C:\ or D:\) cannot be loaded via filesystem.
+    // Map them to local playable audio files so audio playback always works smoothly in browser!
+    const demos = [
+      "/audio/chavosh-ambient.wav",
+      "/audio/chavosh-chill.wav",
+      "/audio/chavosh-lofi.wav",
+    ];
+    let hash = 0;
+    for (let i = 0; i < path.length; i++) {
+      hash = (hash << 5) - hash + path.charCodeAt(i);
+      hash |= 0;
+    }
+    return demos[Math.abs(hash) % demos.length];
+  }
+  try {
+    return convertFileSrc(path);
+  } catch {
+    return path;
+  }
+}
 
 let lastGlobalNavTime = 0;
 export const safeNextTrack = () => {
@@ -29,6 +67,7 @@ export function useAudioPlayer() {
    *  load effect from re-loading it (which caused the audible "played twice"
    *  glitch on every remix transition). */
   const preparedDeckRef = useRef<{ id?: number; path: string; deck: "A" | "B" } | null>(null);
+  const lastLoadedLyricsTrackRef = useRef<string | null>(null);
 
   const store = usePlayerStore;
   const currentTrack = usePlayerStore(selectCurrentTrack);
@@ -38,6 +77,7 @@ export function useAudioPlayer() {
   const settings = usePlayerStore((s) => s.settings);
   const coverCache = usePlayerStore((s) => s.coverCache);
   const setCoverCache = usePlayerStore((s) => s.setCoverCache);
+  const loadLyrics = usePlayerStore((s) => s.loadLyrics);
 
   // Initialize both audio elements
   useEffect(() => {
@@ -45,8 +85,14 @@ export function useAudioPlayer() {
     const audioB = new Audio();
     audioA.preload = "auto";
     audioB.preload = "auto";
+    audioA.crossOrigin = "anonymous";
+    audioB.crossOrigin = "anonymous";
     audioARef.current = audioA;
     audioBRef.current = audioB;
+
+    // Attach both decks to audio analyser early for instantaneous spectrum tracking
+    attachAudioToAnalyser(audioA);
+    attachAudioToAnalyser(audioB);
 
     const onTimeUpdate = (e: Event) => {
       const audio = e.currentTarget as HTMLAudioElement;
@@ -83,21 +129,36 @@ export function useAudioPlayer() {
       }
     };
 
+    const onError = (e: Event) => {
+      const audio = e.currentTarget as HTMLAudioElement;
+      console.warn("Audio element failed to load src:", audio.src, e);
+      if (!isTauri() && !audio.src.endsWith("/audio/chavosh-ambient.wav")) {
+        audio.src = "/audio/chavosh-ambient.wav";
+        if (store.getState().isPlaying) {
+          audio.play().catch(() => {});
+        }
+      }
+    };
+
     audioA.addEventListener("timeupdate", onTimeUpdate);
     audioA.addEventListener("loadedmetadata", onLoadedMetadata);
     audioA.addEventListener("ended", onEnded);
+    audioA.addEventListener("error", onError);
 
     audioB.addEventListener("timeupdate", onTimeUpdate);
     audioB.addEventListener("loadedmetadata", onLoadedMetadata);
     audioB.addEventListener("ended", onEnded);
+    audioB.addEventListener("error", onError);
 
     return () => {
       audioA.removeEventListener("timeupdate", onTimeUpdate);
       audioA.removeEventListener("loadedmetadata", onLoadedMetadata);
       audioA.removeEventListener("ended", onEnded);
+      audioA.removeEventListener("error", onError);
       audioB.removeEventListener("timeupdate", onTimeUpdate);
       audioB.removeEventListener("loadedmetadata", onLoadedMetadata);
       audioB.removeEventListener("ended", onEnded);
+      audioB.removeEventListener("error", onError);
       audioA.pause();
       audioB.pause();
       if (remixCheckIntervalRef.current) {
@@ -108,20 +169,18 @@ export function useAudioPlayer() {
 
   // Fetch cover art if not cached
   useEffect(() => {
-    if (!currentTrack) return;
-    if (coverCache[currentTrack.path]) return;
+    if (!currentTrack || !currentTrack.path) return;
+    loadTrackCover(currentTrack.path);
+  }, [currentTrack?.path]);
 
-    let active = true;
-    getTrackCover(currentTrack.path).then((coverUrl) => {
-      if (active && coverUrl) {
-        setCoverCache(currentTrack.path, coverUrl);
-      }
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [currentTrack?.path, coverCache, setCoverCache]);
+  // Automatically search and load lyrics on track change (guarded against duplicate invocations)
+  useEffect(() => {
+    if (!currentTrack || !currentTrack.path) return;
+    const trackKey = `${currentTrack.id}:${currentTrack.path}`;
+    if (lastLoadedLyricsTrackRef.current === trackKey) return;
+    lastLoadedLyricsTrackRef.current = trackKey;
+    loadLyrics(currentTrack);
+  }, [currentTrack?.id, currentTrack?.path, loadLyrics]);
 
   // Windows Media Transport Controls (SMTC) & Background Media Keys
   // Enables hardware media keys (Next/Prev/Play/Pause) to work even when Chavosh is unfocused or minimized!
@@ -203,12 +262,29 @@ export function useAudioPlayer() {
       return;
     }
 
-    const src = convertFileSrc(currentTrack.path);
-    activeAudio.src = src;
+    const src = toAudioSrc(currentTrack.path);
+    if (!activeAudio.src || !activeAudio.src.endsWith(src)) {
+      activeAudio.src = src;
+    }
     activeAudio.volume = volume;
 
     if (isPlaying) {
-      activeAudio.play().catch(() => {});
+      resumeAudioContext();
+      attachAudioToAnalyser(activeAudio);
+      resumeAudioContext();
+      attachAudioToAnalyser(activeAudio);
+      const playPromise = activeAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Audio play() caught:", err);
+          const onCanPlay = () => {
+            if (store.getState().isPlaying) {
+              activeAudio.play().catch(() => {});
+            }
+          };
+          activeAudio.addEventListener("canplay", onCanPlay, { once: true });
+        });
+      }
     }
 
     // Remix Mode: seek directly into energetic section (20-25%)
@@ -226,7 +302,7 @@ export function useAudioPlayer() {
         activeAudio.addEventListener("loadedmetadata", handleJump, { once: true });
       }
     }
-  }, [currentTrack?.id, settings.remixEnabled]);
+  }, [currentTrack?.id, currentTrack?.path, settings.remixEnabled]);
 
   // High-Energy Seamless Remix Crossfade Engine
   useEffect(() => {
@@ -273,7 +349,7 @@ export function useAudioPlayer() {
         }
 
         // Prepare next deck
-        nextAudio.src = convertFileSrc(nextTrack.path);
+        nextAudio.src = toAudioSrc(nextTrack.path);
         nextAudio.volume = 0;
 
         const startCrossfade = () => {
@@ -351,13 +427,32 @@ export function useAudioPlayer() {
     const activeAudio = activeDeckRef.current === "A" ? audioARef.current : audioBRef.current;
     if (!activeAudio) return;
     if (isPlaying) {
-      activeAudio.play().catch(() => {});
+      if (currentTrack) {
+        const expected = toAudioSrc(currentTrack.path);
+        if (!activeAudio.src || !activeAudio.src.endsWith(expected)) {
+          activeAudio.src = expected;
+        }
+      }
+      resumeAudioContext();
+      attachAudioToAnalyser(activeAudio);
+      const playPromise = activeAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Audio play() waiting for data:", err);
+          const onCanPlay = () => {
+            if (store.getState().isPlaying) {
+              activeAudio.play().catch(() => {});
+            }
+          };
+          activeAudio.addEventListener("canplay", onCanPlay, { once: true });
+        });
+      }
     } else {
       activeAudio.pause();
       const inactiveAudio = activeDeckRef.current === "A" ? audioBRef.current : audioARef.current;
       inactiveAudio?.pause();
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentTrack?.path]);
 
   // Volume
   useEffect(() => {
@@ -459,6 +554,33 @@ export function useAudioPlayer() {
       }
 
       // Arrow navigation
+      if ((e.ctrlKey || e.metaKey) && (e.key === "l" || e.key === "L")) {
+        e.preventDefault();
+        s.toggleLyrics();
+        return;
+      }
+      if (e.code === "Escape") {
+        if (s.showLyrics) {
+          e.preventDefault();
+          s.setShowLyrics(false);
+          return;
+        }
+        if (s.showSettings) {
+          e.preventDefault();
+          s.setShowSettings(false);
+          return;
+        }
+        if (s.showNowPlayingOverlay) {
+          e.preventDefault();
+          s.setShowNowPlayingOverlay(false);
+          return;
+        }
+        if (s.showQueueDrawer) {
+          e.preventDefault();
+          s.setShowQueueDrawer(false);
+          return;
+        }
+      }
       if (e.code === "ArrowLeft") {
         e.preventDefault();
         if (e.altKey || e.ctrlKey) safePrevTrack();

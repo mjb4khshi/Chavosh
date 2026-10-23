@@ -9,15 +9,77 @@ import {
   User,
   FolderPlus,
   ArrowLeft,
+  Sparkles,
+  Search,
+  Image as ImageIcon,
 } from "lucide-react";
 import { usePlayerStore, type Track } from "../stores/playerStore";
 import { formatTime } from "../utils/format";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { isTauri, parseAudioFiles, loadSampleTracks } from "../utils/browserAudio";
+import { loadTrackCover } from "../utils/coverLoader";
 import SarvBadge from "./sarv/SarvBadge";
 import SarvButton from "./sarv/SarvButton";
 import SarvStatCard from "./sarv/SarvStatCard";
+import { CoverEditModal } from "./CoverEditModal";
+
+function normalizeText(str: string): string {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/[ي]/g, "ی")
+    .replace(/[ك]/g, "ک")
+    .replace(/[آأإ]/g, "ا")
+    .trim();
+}
+
+function LazyTrackCover({ path, className = "w-10 h-10 rounded-lg" }: { path: string; className?: string }) {
+  // Subscribe ONLY to this specific track's cover, preventing 90,000 global re-renders
+  const cover = usePlayerStore((s) => s.coverCache[path]);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (cover !== undefined) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    // Load only when scrolled near or inside viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "180px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [cover]);
+
+  useEffect(() => {
+    if (!isVisible || !path || cover !== undefined) return;
+    loadTrackCover(path);
+  }, [isVisible, path, cover]);
+
+  return (
+    <div
+      ref={containerRef}
+      className={`${className} overflow-hidden bg-base-content/[0.06] shrink-0 flex items-center justify-center border border-base-content/10`}
+    >
+      {cover ? (
+        <img src={cover} alt="" className="w-full h-full object-cover" loading="lazy" />
+      ) : (
+        <Disc3 size={15} className="opacity-35 text-base-content" />
+      )}
+    </div>
+  );
+}
 
 /**
  * Sarv UI Spacing System (4px grid)
@@ -48,8 +110,22 @@ export function LibraryContent() {
   const setActiveTab = usePlayerStore((s) => s.setActiveTab);
 
   const [scanning, setScanning] = useState(false);
+  const [coverEditTrack, setCoverEditTrack] = useState<Track | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const coverEditModalNode = coverEditTrack ? (
+    <CoverEditModal
+      track={coverEditTrack}
+      currentCover={coverCache[coverEditTrack.path] ?? null}
+      onClose={() => setCoverEditTrack(null)}
+    />
+  ) : null;
 
   const handleAddFolder = async () => {
+    if (!isTauri()) {
+      fileInputRef.current?.click();
+      return;
+    }
     try {
       const selected = await open({ directory: true, multiple: true });
       if (!selected) return;
@@ -59,36 +135,53 @@ export function LibraryContent() {
       addTracks(newTracks);
       setFolders([...new Set([...folders, ...paths])]);
     } catch (e) {
-      console.error("Failed to scan folders:", e);
+      console.error("Failed to scan folders via Tauri:", e);
+      fileInputRef.current?.click();
     } finally {
       setScanning(false);
     }
   };
 
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll to top and reset album/artist view when search query changes
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      if (selectedArtist) setSelectedArtist(null);
+      if (selectedAlbum) setSelectedAlbum(null);
+      if (activeTab !== "tracks") setActiveTab("tracks");
+    }
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [searchQuery]);
+
   const filtered = tracks.filter((t) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
+    if (!searchQuery.trim()) return true;
+    const q = normalizeText(searchQuery);
     return (
-      t.title.toLowerCase().includes(q) ||
-      t.artist.toLowerCase().includes(q) ||
-      t.album.toLowerCase().includes(q)
+      normalizeText(t.title || "").includes(q) ||
+      normalizeText(t.artist || "").includes(q) ||
+      normalizeText(t.album || "").includes(q)
     );
   });
 
-  const totalDuration = filtered.reduce((acc, t) => acc + t.duration, 0);
+  const totalDuration = filtered.reduce((acc, t) => acc + (t.duration || 0), 0);
 
   const albumsMap = new Map<string, Track[]>();
-  tracks.forEach((t) => {
-    const list = albumsMap.get(t.album) || [];
+  filtered.forEach((t) => {
+    const albumName = t.album || "Unknown Album";
+    const list = albumsMap.get(albumName) || [];
     list.push(t);
-    albumsMap.set(t.album, list);
+    albumsMap.set(albumName, list);
   });
 
   const artistsMap = new Map<string, Track[]>();
-  tracks.forEach((t) => {
-    const list = artistsMap.get(t.artist) || [];
+  filtered.forEach((t) => {
+    const artistName = t.artist || "Unknown Artist";
+    const list = artistsMap.get(artistName) || [];
     list.push(t);
-    artistsMap.set(t.artist, list);
+    artistsMap.set(artistName, list);
   });
 
   // Shared Track Row: full = 6 columns (cover + album), compact = 4 columns
@@ -105,7 +198,7 @@ export function LibraryContent() {
 
     return (
       <div
-        key={t.id}
+        key={`${t.path || t.id}-${idx}`}
         onDoubleClick={() => playTrack(t, list)}
         className="group grid items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all hover:bg-white/[0.04]"
         style={{
@@ -148,12 +241,18 @@ export function LibraryContent() {
         </div>
 
         {variant === "full" && (
-                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-base-content/[0.06] shrink-0 flex items-center justify-center border border-base-content/10">
-            {cover ? (
-              <img src={cover} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <Disc3 size={15} className="opacity-35 text-base-content" />
-            )}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setCoverEditTrack(t);
+            }}
+            className="w-10 h-10 rounded-lg relative overflow-hidden group/thumb cursor-pointer shrink-0 border border-base-content/10 shadow-sm"
+            title="تغییر کاور این قطعه / Fix Cover"
+          >
+            <LazyTrackCover path={t.path} className="w-full h-full" />
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white transition-opacity">
+              <ImageIcon size={13} className="text-[var(--primary,#0066a4)]" />
+            </div>
           </div>
         )}
 
@@ -347,6 +446,7 @@ export function LibraryContent() {
             </div>
           </div>
         </div>
+        {coverEditModalNode}
       </main>
     );
   }
@@ -375,12 +475,22 @@ export function LibraryContent() {
 
           {/* Album Hero */}
           <div className="sarv-card p-5 flex flex-col md:flex-row items-center gap-5 mb-6">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-base-content/10 shadow-xl flex items-center justify-center bg-base-content/[0.06] relative">
+            <div
+              onClick={() => {
+                if (albumTracks[0]) setCoverEditTrack(albumTracks[0]);
+              }}
+              className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-base-content/10 shadow-xl flex items-center justify-center bg-base-content/[0.06] relative group cursor-pointer"
+              title="تغییر کاور آلبوم / Fix Album Cover"
+            >
               {albumCover ? (
                 <img src={albumCover} alt="" className="w-full h-full object-cover" />
               ) : (
                 <Disc3 size={36} className="text-base-content/40" />
               )}
+              <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1 text-white transition-opacity">
+                <ImageIcon size={18} className="text-[var(--primary,#0066a4)]" />
+                <span className="text-[10px] font-bold">Fix Cover</span>
+              </div>
             </div>
 
             <div className="min-w-0 flex-1 text-center md:text-left">
@@ -448,13 +558,14 @@ export function LibraryContent() {
             </div>
           </div>
         </div>
+        {coverEditModalNode}
       </main>
     );
   }
   // 3. MAIN VIEWS (SONGS, ALBUMS, ARTISTS, FOLDERS)
   return (
     <main className="flex-1 flex flex-col overflow-hidden select-none relative">
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-6 py-5">
         {/* Sarv Bento Metrics Grid */}
         {activeTab === "tracks" && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
@@ -557,26 +668,58 @@ export function LibraryContent() {
 
         {/* Empty State */}
         {tracks.length === 0 && (
-          <div className="sarv-card p-10 flex flex-col items-center justify-center text-center gap-3 my-6">
+          <div className="sarv-card p-10 flex flex-col items-center justify-center text-center gap-3.5 my-6 relative overflow-hidden">
+            <input
+              type="file"
+              ref={fileInputRef}
+              multiple
+              accept="audio/*"
+              className="hidden"
+              onChange={async (e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  setScanning(true);
+                  try {
+                    await parseAudioFiles(e.target.files);
+                  } finally {
+                    setScanning(false);
+                    e.target.value = "";
+                  }
+                }
+              }}
+            />
             <div className="w-14 h-14 rounded-2xl bg-base-content/[0.06] flex items-center justify-center text-[var(--theme-color-primary,#0066a4)] shadow-inner">
               <FolderPlus size={26} />
             </div>
             <div>
               <h2 className="text-sm font-bold text-base-content">Your Music Library is Empty</h2>
               <p className="text-xs text-neutral mt-1 max-w-sm">
-                Add a folder containing MP3, FLAC, WAV, M4A, or OGG music files to start listening with Chavosh.
+                Add your MP3, FLAC, WAV, M4A, or OGG files, or load sample tracks to test the player.
               </p>
             </div>
-            <SarvButton
-              variant="primary"
-              size="sm"
-              onClick={handleAddFolder}
-              disabled={scanning}
-              icon={<FolderPlus size={13} />}
-              className="mt-1 font-bold"
-            >
-              {scanning ? "Scanning Directory..." : "Select Music Folder"}
-            </SarvButton>
+            <div className="flex items-center gap-2 mt-1">
+              <SarvButton
+                variant="primary"
+                size="sm"
+                onClick={handleAddFolder}
+                disabled={scanning}
+                icon={<FolderPlus size={13} />}
+                className="font-bold"
+              >
+                {scanning ? "Scanning..." : isTauri() ? "Select Music Folder" : "Add Audio Files"}
+              </SarvButton>
+              <SarvButton
+                variant="soft"
+                styleType="soft"
+                size="sm"
+                onClick={() => loadSampleTracks()}
+                icon={<Sparkles size={13} />}
+              >
+                Load Demo Tracks
+              </SarvButton>
+            </div>
+            <div className="text-[11px] text-base-content/40 mt-1">
+              Tip: You can also drag & drop audio files directly into this window
+            </div>
           </div>
         )}
 
@@ -597,9 +740,17 @@ export function LibraryContent() {
               <span />
             </div>
 
-            <div className="flex flex-col gap-0.5 mt-1 pb-10">
-              {filtered.map((t, idx) => renderTrackRow(t, filtered, idx, "full", "artist"))}
-            </div>
+            {filtered.length === 0 ? (
+              <div className="py-16 flex flex-col items-center justify-center text-center gap-2.5 text-neutral">
+                <Search size={30} className="opacity-30" />
+                <p className="text-sm font-semibold text-base-content/75">No songs found</p>
+                <p className="text-xs text-neutral">No tracks matching &ldquo;{searchQuery}&rdquo;</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-0.5 mt-1 pb-10">
+                {filtered.map((t, idx) => renderTrackRow(t, filtered, idx, "full", "artist"))}
+              </div>
+            )}
           </div>
         )}
 
@@ -608,7 +759,8 @@ export function LibraryContent() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-10">
             {Array.from(albumsMap.entries()).map(([albumName, albumTracks]) => {
               const trackWithCover = albumTracks.find((t) => coverCache[t.path]);
-              const cover = trackWithCover ? coverCache[trackWithCover.path] : null;
+              const candidate = trackWithCover || albumTracks[0];
+              const candidatePath = candidate?.path || "";
 
               return (
                 <div
@@ -617,15 +769,7 @@ export function LibraryContent() {
                   className="sarv-card sarv-card-hover p-3 rounded-2xl flex flex-col gap-2.5 cursor-pointer group"
                 >
                   <div className="aspect-square rounded-xl relative overflow-hidden bg-base-content/[0.06] flex items-center justify-center border border-base-content/10">
-                    {cover ? (
-                      <img src={cover} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                    ) : (
-                      <div className="w-4/5 h-4/5 rounded-full vinyl-grooves flex items-center justify-center">
-                        <div className="w-1/3 h-1/3 rounded-full bg-[var(--theme-color-primary,#0066a4)] flex items-center justify-center">
-                          <Disc3 size={16} className="text-base-content" />
-                        </div>
-                      </div>
-                    )}
+                    <LazyTrackCover path={candidatePath} className="w-full h-full rounded-xl" />
                     <button
                       type="button"
                       onClick={(e) => {
@@ -658,7 +802,8 @@ export function LibraryContent() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-10">
             {Array.from(artistsMap.entries()).map(([artistName, artistTracks]) => {
               const trackWithCover = artistTracks.find((t) => coverCache[t.path]);
-              const artistCover = trackWithCover ? coverCache[trackWithCover.path] : null;
+              const candidate = trackWithCover || artistTracks[0];
+              const candidatePath = candidate?.path || "";
 
               return (
                 <div
@@ -666,13 +811,7 @@ export function LibraryContent() {
                   onClick={() => setSelectedArtist(artistName)}
                   className="sarv-card sarv-card-hover p-3 rounded-2xl flex items-center gap-3 cursor-pointer group"
                 >
-                  <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-base-content/10 shadow-md flex items-center justify-center bg-[var(--theme-color-primary,#0066a4)]/20 text-[var(--theme-color-primary,#0066a4)] group-hover:scale-105 transition-transform">
-                    {artistCover ? (
-                      <img src={artistCover} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <User size={18} />
-                    )}
-                  </div>
+                  <LazyTrackCover path={candidatePath} className="w-10 h-10 rounded-full" />
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-bold truncate text-base-content group-hover:text-[var(--theme-color-primary,#0066a4)] transition-colors">
                       {artistName}
@@ -708,6 +847,7 @@ export function LibraryContent() {
           </div>
         )}
       </div>
+      {coverEditModalNode}
     </main>
   );
 }

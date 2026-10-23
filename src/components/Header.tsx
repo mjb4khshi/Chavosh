@@ -39,6 +39,9 @@ export function Header() {
   const alwaysOnTop = usePlayerStore((s) => s.alwaysOnTop);
   const toggleAlwaysOnTop = usePlayerStore((s) => s.toggleAlwaysOnTop);
   const setShowSettings = usePlayerStore((s) => s.setShowSettings);
+  const setActiveTab = usePlayerStore((s) => s.setActiveTab);
+  const setSelectedArtist = usePlayerStore((s) => s.setSelectedArtist);
+  const setSelectedAlbum = usePlayerStore((s) => s.setSelectedAlbum);
 
   const [pinFeedback, setPinFeedback] = useState(false);
 
@@ -108,16 +111,18 @@ export function Header() {
   return (
     <header
       onMouseDown={handleMouseDown}
-      className="h-14 w-full flex items-center gap-3 px-4 select-none shrink-0 border-b border-base-content/[0.08] cursor-default relative z-30"
+      className="h-14 w-full flex items-center gap-3 px-4 select-none shrink-0 border-b border-base-content/[0.06] cursor-default relative z-30 transition-colors duration-300"
       style={{
-        background:
-          "color-mix(in oklab, var(--theme-color-base-500, #141620) 18%, var(--theme-color-base, #07080c))",
+        background: showNowPlayingOverlay
+          ? "color-mix(in srgb, var(--theme-color-base) 18%, transparent)"
+          : "color-mix(in srgb, var(--theme-color-base) 45%, transparent)",
         backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
       }}
     >
       {/* Brand */}
       <div className="flex items-center gap-2.5 shrink-0">
-        <div className="w-8 h-8 rounded-[var(--radius-button)] relative overflow-hidden flex items-center justify-center shadow-md border border-base-content/10 bg-base-900">
+        <div className="w-8 h-8 rounded-[var(--radius-button)] relative overflow-hidden flex items-center justify-center shadow-md border border-base-content/10 bg-base-content/[0.06]">
           <img
             src="/logo.png"
             alt="Chavosh Logo"
@@ -127,7 +132,7 @@ export function Header() {
         <div className="hidden sm:flex flex-col leading-tight min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] font-black tracking-widest uppercase text-base-content">CHAVOSH</span>
-            <SarvBadge variant="primary" soft size="xs" className="font-mono">v0.1.0</SarvBadge>
+            <SarvBadge variant="primary" soft size="xs" className="font-mono">v1.0.0</SarvBadge>
           </div>
           <span className="text-[10px] text-neutral font-medium">Music Player</span>
         </div>
@@ -184,7 +189,16 @@ export function Header() {
               type="text"
               dir="auto"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                if (val.trim()) {
+                  setActiveTab("tracks");
+                  setSelectedArtist(null);
+                  setSelectedAlbum(null);
+                  setShowNowPlayingOverlay(false);
+                }
+              }}
               placeholder="Search songs, artists, albums..."
               className="input input-primary w-full text-xs transition-all text-base-content placeholder:text-neutral focus:outline-none"
               style={{

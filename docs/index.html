@@ -3,52 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>چاووش | Chavosh - Modern Desktop Music Player</title>
+  <title>چاووش | Chavosh — Modern Desktop Audio Player</title>
   
   <!-- Primary Meta Tags -->
-  <meta name="title" content="چاووش | Chavosh - Modern Desktop Music Player" />
-  <meta name="description" content="موزیک پلیر مدرن، فوق‌العاده سبک و زیبا برای دسکتاپ بر پایه Tauri v2، Rust و زبان طراحی سرو (Sarv UI) با ۵ حالت پخش و فیزیک واقعی گرامافون." />
-  <meta name="keywords" content="Chavosh, music player, tauri, rust, vinyl, gramophone, sarv ui, react 19, desktop player, موزیک پلیر, چاووش" />
+  <meta name="title" content="چاووش | Chavosh — Modern Desktop Audio Player" />
+  <meta name="description" content="موزیک پلیر مدرن، سبک و چشم‌نواز برای دسکتاپ بر پایه Tauri v2، Rust و زبان طراحی Sarv UI با لیریک همگام، اکولایزر مایع و فیزیک واقع‌گرایانه وینیل." />
+  <meta name="keywords" content="Chavosh, music player, tauri v2, rust, vinyl, gramophone, sarv ui, react 19, desktop player, موزیک پلیر, چاووش, لیریک" />
   <meta name="author" content="MJ Bakhshi" />
 
-  <!-- Open Graph / Facebook / Telegram / WhatsApp -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://github.com/mjb4khshi/chavosh" />
-  <meta property="og:title" content="چاووش | Chavosh - Modern Desktop Music Player" />
-  <meta property="og:description" content="موزیک پلیر مدرن و سبک دسکتاپ با فیزیک واقعی گرامافون، ویجت‌های شناور و سرعت نیتیو راست." />
-  <meta property="og:image" content="https://raw.githubusercontent.com/mjb4khshi/chavosh/master/chavosh%20banner.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:title" content="چاووش | Chavosh — Modern Desktop Audio Player" />
+  <meta property="og:description" content="موزیک پلیر مدرن دسکتاپ با فیزیک واقعی گرامافون، لیریک همگام، اکولایزر امواج مایع و سرعت نیتیو راست." />
+  <meta property="og:image" content="./banner.png" />
 
   <!-- Twitter / X -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://github.com/mjb4khshi/chavosh" />
-  <meta property="twitter:title" content="چاووش | Chavosh - Modern Desktop Music Player" />
-  <meta property="twitter:description" content="موزیک پلیر مدرن و سبک دسکتاپ با فیزیک واقعی گرامافون، ویجت‌های شناور و سرعت نیتیو راست." />
-  <meta property="twitter:image" content="https://raw.githubusercontent.com/mjb4khshi/chavosh/master/chavosh%20banner.png" />
+  <meta property="twitter:title" content="چاووش | Chavosh — Modern Desktop Audio Player" />
+  <meta property="twitter:description" content="موزیک پلیر مدرن دسکتاپ با فیزیک واقعی گرامافون، لیریک همگام، اکولایزر امواج مایع و سرعت نیتیو راست." />
+  <meta property="twitter:image" content="./banner.png" />
 
   <link rel="icon" type="image/png" href="./logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@300;400;500;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Vazirmatn:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --primary: #0066a4;
-      --primary-hover: #0077c2;
-      --primary-glow: rgba(0, 102, 164, 0.45);
-      --bg: #07080c;
-      --bg-surface: #0d0f17;
-      --bg-card: rgba(18, 21, 32, 0.7);
+      --primary: #0088cc;
+      --primary-hover: #0099e6;
+      --primary-glow: rgba(0, 136, 204, 0.45);
+      --bg: #06070a;
+      --bg-surface: #0b0d13;
+      --bg-card: rgba(15, 18, 26, 0.75);
       --border: rgba(255, 255, 255, 0.08);
       --border-hover: rgba(255, 255, 255, 0.18);
-      --text: #f0f3fa;
-      --text-dim: #949db2;
-      --text-muted: #5e6678;
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
       --accent: #fe28a2;
       --radius-sm: 10px;
       --radius-md: 18px;
-      --radius-lg: 28px;
+      --radius-lg: 24px;
       --radius-full: 9999px;
     }
 
@@ -66,9 +64,9 @@
       overflow-x: hidden;
       line-height: 1.6;
       background-image: 
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 102, 164, 0.25), transparent 70%),
-        radial-gradient(circle at 90% 80%, rgba(254, 40, 162, 0.08), transparent 50%),
-        radial-gradient(circle at 10% 40%, rgba(0, 102, 164, 0.08), transparent 40%);
+        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(0, 136, 204, 0.22), transparent 75%),
+        radial-gradient(circle at 90% 70%, rgba(254, 40, 162, 0.06), transparent 50%),
+        radial-gradient(circle at 10% 30%, rgba(0, 136, 204, 0.06), transparent 45%);
       background-attachment: fixed;
     }
 
@@ -81,9 +79,8 @@
       text-decoration: none;
     }
 
-    /* Container */
     .container {
-      max-width: 1200px;
+      max-width: 1160px;
       margin: 0 auto;
       padding: 0 24px;
     }
@@ -93,16 +90,16 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      background: rgba(7, 8, 12, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(6, 7, 10, 0.78);
       border-bottom: 1px solid var(--border);
     }
     .nav-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 72px;
+      height: 70px;
     }
     .brand {
       display: flex;
@@ -113,8 +110,8 @@
       letter-spacing: -0.5px;
     }
     .brand img {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
       box-shadow: 0 4px 16px var(--primary-glow);
     }
@@ -122,7 +119,7 @@
       display: flex;
       align-items: center;
       gap: 28px;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: var(--text-dim);
     }
@@ -132,7 +129,7 @@
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     /* Buttons */
@@ -141,12 +138,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px 20px;
-      font-size: 0.95rem;
+      padding: 9px 18px;
+      font-size: 0.92rem;
       font-weight: 700;
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       border: 1px solid transparent;
       text-align: center;
     }
@@ -172,14 +169,14 @@
       transform: translateY(-2px);
     }
     .btn-lg {
-      padding: 14px 28px;
-      font-size: 1.05rem;
+      padding: 13px 26px;
+      font-size: 1.02rem;
       border-radius: var(--radius-md);
     }
 
     /* Hero Section */
     .hero {
-      padding: 60px 0 80px;
+      padding: 60px 0 70px;
       text-align: center;
       position: relative;
     }
@@ -189,16 +186,16 @@
       gap: 8px;
       padding: 6px 16px;
       border-radius: var(--radius-full);
-      background: rgba(0, 102, 164, 0.12);
-      border: 1px solid rgba(0, 102, 164, 0.3);
+      background: rgba(0, 136, 204, 0.12);
+      border: 1px solid rgba(0, 136, 204, 0.3);
       color: #38bdf8;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 700;
       margin-bottom: 24px;
     }
     .hero-badge .dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #38bdf8;
       box-shadow: 0 0 10px #38bdf8;
@@ -206,27 +203,27 @@
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.85); }
+      50% { opacity: 0.45; transform: scale(0.85); }
     }
     .hero-title {
-      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-size: clamp(2.3rem, 5vw, 4rem);
       font-weight: 900;
-      line-height: 1.15;
+      line-height: 1.18;
       letter-spacing: -1px;
       margin-bottom: 20px;
-      max-width: 900px;
+      max-width: 860px;
       margin-left: auto;
       margin-right: auto;
     }
     .hero-title .gradient-text {
-      background: linear-gradient(135deg, #fff 20%, #7dd3fc 70%, var(--accent) 100%);
+      background: linear-gradient(135deg, #ffffff 25%, #7dd3fc 70%, #fe28a2 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .hero-subtitle {
-      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-size: clamp(0.98rem, 1.8vw, 1.2rem);
       color: var(--text-dim);
-      max-width: 680px;
+      max-width: 660px;
       margin: 0 auto 36px;
       font-weight: 400;
     }
@@ -234,9 +231,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
-      margin-bottom: 40px;
+      margin-bottom: 44px;
     }
 
     /* Download Dropdown */
@@ -249,11 +246,11 @@
       top: 110%;
       left: 50%;
       transform: translateX(-50%) translateY(8px);
-      background: #111420;
+      background: #0f121b;
       border: 1px solid var(--border-hover);
       border-radius: var(--radius-md);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      min-width: 280px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+      min-width: 290px;
       padding: 8px;
       z-index: 50;
       opacity: 0;
@@ -261,7 +258,7 @@
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .download-dropdown:hover .dropdown-menu,
-    .download-dropdown.active .dropdown-menu {
+    .download-dropdown:focus-within .dropdown-menu {
       opacity: 1;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
@@ -273,24 +270,25 @@
       padding: 10px 14px;
       border-radius: var(--radius-sm);
       color: var(--text);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       transition: background 0.15s ease;
     }
     .dropdown-item:hover {
-      background: rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.08);
       color: #fff;
     }
     .dropdown-item .icon {
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      background: rgba(0, 102, 164, 0.2);
+      background: rgba(0, 136, 204, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #38bdf8;
       font-size: 14px;
+      shrink: 0;
     }
     .dropdown-item .details {
       display: flex;
@@ -301,18 +299,19 @@
       text-align: left;
     }
     .dropdown-item .details span:last-child {
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Hero Banner Display */
+    /* Hero Banner Wrap */
     .hero-banner-wrap {
       position: relative;
       border-radius: var(--radius-lg);
       overflow: hidden;
       border: 1px solid var(--border);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      max-width: 1060px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      max-width: 1040px;
       margin: 0 auto;
       background: #000;
     }
@@ -323,43 +322,90 @@
       transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .hero-banner-wrap:hover img {
-      transform: scale(1.02);
+      transform: scale(1.015);
     }
 
     /* Section Styles */
     .section {
-      padding: 90px 0;
+      padding: 80px 0;
     }
     .section-header {
       text-align: center;
-      max-width: 680px;
-      margin: 0 auto 54px;
+      max-width: 660px;
+      margin: 0 auto 48px;
     }
     .section-tag {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 800;
       color: #38bdf8;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: block;
     }
     .section-title {
-      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-      font-weight: 800;
+      font-size: clamp(1.75rem, 3.2vw, 2.4rem);
+      font-weight: 900;
       letter-spacing: -0.5px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .section-subtitle {
       color: var(--text-dim);
-      font-size: 1.05rem;
+      font-size: 1rem;
+    }
+
+    /* Features Grid (Highlighting New Superpowers) */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+    }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 136, 204, 0.16);
+      border: 1px solid rgba(0, 136, 204, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #38bdf8;
+      margin-bottom: 18px;
+    }
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      line-height: 1.6;
     }
 
     /* 5 Modes Bento Cards */
     .modes-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 24px;
+      gap: 20px;
     }
     .mode-card {
       background: var(--bg-card);
@@ -367,18 +413,18 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 32px;
+      padding: 28px;
       position: relative;
       overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
     .mode-card:hover {
       border-color: var(--border-hover);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4);
     }
     .mode-card.col-7 { grid-column: span 7; }
     .mode-card.col-5 { grid-column: span 5; }
@@ -391,40 +437,41 @@
       border-radius: var(--radius-full);
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: var(--text-dim);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       width: fit-content;
+      font-family: 'JetBrains Mono', monospace;
     }
     .mode-card h3 {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 800;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .mode-card p {
       color: var(--text-dim);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       line-height: 1.6;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     /* Interactive Vinyl Turntable Mockup */
     .vinyl-preview-box {
-      background: #090a10;
+      background: #08090f;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
-      padding: 24px;
+      padding: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
-      min-height: 180px;
+      min-height: 160px;
     }
     .vinyl-disc {
-      width: 120px;
-      height: 120px;
+      width: 110px;
+      height: 110px;
       border-radius: 50%;
       background: repeating-radial-gradient(circle, #08080c 0%, #15161f 2px, #08080c 4px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.05);
@@ -435,15 +482,15 @@
       justify-content: center;
     }
     .vinyl-label {
-      width: 50px;
-      height: 50px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: var(--primary);
       box-shadow: 0 0 0 3px #000;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 900;
       color: #fff;
     }
@@ -456,32 +503,32 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 12px;
-      max-width: 860px;
-      margin: 0 auto 40px;
+      gap: 10px;
+      max-width: 820px;
+      margin: 0 auto;
     }
     .theme-pill {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 18px;
+      gap: 9px;
+      padding: 9px 16px;
       border-radius: var(--radius-full);
       background: var(--bg-card);
       border: 1px solid var(--border);
       color: var(--text);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .theme-pill:hover, .theme-pill.active {
       border-color: var(--primary);
-      background: rgba(0, 102, 164, 0.15);
+      background: rgba(0, 136, 204, 0.15);
       transform: translateY(-2px);
     }
     .theme-dot {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
     }
 
@@ -490,7 +537,7 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 32px;
+      padding: 28px;
       overflow-x: auto;
     }
     .shortcuts-table {
@@ -502,16 +549,16 @@
       text-align: left;
     }
     .shortcuts-table th {
-      padding: 12px 16px;
+      padding: 10px 14px;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       border-bottom: 1px solid var(--border);
       font-weight: 700;
     }
     .shortcuts-table td {
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
     }
     kbd {
       display: inline-block;
@@ -520,7 +567,7 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 6px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
     }
@@ -528,16 +575,16 @@
     /* Footer */
     .footer {
       border-top: 1px solid var(--border);
-      padding: 48px 0;
+      padding: 40px 0;
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
     .footer-links {
       display: flex;
       justify-content: center;
       gap: 24px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       font-weight: 600;
       color: var(--text-dim);
     }
@@ -577,12 +624,12 @@
 
       <div class="nav-actions">
         <!-- Language Switcher -->
-        <button id="lang-btn" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.85rem;" onclick="toggleLang()">
+        <button id="lang-btn" class="btn btn-outline" style="padding: 7px 13px; font-size: 0.82rem;" onclick="toggleLang()">
           🌐 English
         </button>
 
         <!-- GitHub Link -->
-        <a href="https://github.com/mjb4khshi/chavosh" target="_blank" class="btn btn-outline" style="padding: 8px 14px;">
+        <a href="https://github.com/mjb4khshi/chavosh" target="_blank" class="btn btn-outline" style="padding: 7px 13px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           <span class="hidden sm:inline">GitHub</span>
         </a>
@@ -594,7 +641,7 @@
   <section class="hero container">
     <div class="hero-badge">
       <span class="dot"></span>
-      <span data-fa="نسخه جدید v0.1.0 با موتور نیتیو Rust منتشر شد" data-en="New v0.1.0 Released with Native Rust Audio Engine">نسخه جدید v0.1.0 با موتور نیتیو Rust منتشر شد</span>
+      <span data-fa="نسخه نهایی v1.0.0 با لیریک کارائوکه و اکولایزر مایع منتشر شد" data-en="New v1.0.0 Released with Karaoke Lyrics & Liquid Wave EQ">نسخه نهایی v1.0.0 با لیریک کارائوکه و اکولایزر مایع منتشر شد</span>
     </div>
 
     <h1 class="hero-title">
@@ -602,43 +649,43 @@
       <span class="gradient-text" data-fa="با قدرت و سرعت نیتیو راست" data-en="Native Rust Performance">با قدرت و سرعت نیتیو راست</span>
     </h1>
 
-    <p class="hero-subtitle" data-fa="موزیک پلیر مدرن، فوق‌العاده سبک و زیبا برای دسکتاپ بر پایه Tauri v2 و زبان طراحی سرو (Sarv UI) با انیمیشن‌های نرم، ۵ حالت پخش و فیزیک واقع‌گرایانه واینیل." data-en="A state-of-the-art desktop music player blending vintage vinyl aesthetics with futuristic mini widgets and high-performance native audio playback.">
-      موزیک پلیر مدرن، فوق‌العاده سبک و زیبا برای دسکتاپ بر پایه Tauri v2 و زبان طراحی سرو (Sarv UI) با انیمیشن‌های نرم، ۵ حالت پخش و فیزیک واقع‌گرایانه واینیل.
+    <p class="hero-subtitle" data-fa="موزیک پلیر مدرن، سبک و زیبا برای دسکتاپ بر پایه Tauri v2 و زبان طراحی سرو (Sarv UI) با لیریک همگام، اکولایزر مایع، کراس‌فید بی‌مکث و فیزیک واقع‌گرایانه واینیل." data-en="A state-of-the-art desktop music player blending vintage vinyl aesthetics with futuristic mini widgets, karaoke synced lyrics, and native audio playback.">
+      موزیک پلیر مدرن، سبک و زیبا برای دسکتاپ بر پایه Tauri v2 و زبان طراحی سرو (Sarv UI) با لیریک همگام، اکولایزر مایع، کراس‌فید بی‌مکث و فیزیک واقع‌گرایانه واینیل.
     </p>
 
     <!-- CTAs -->
     <div class="hero-cta">
       <!-- Main Download Button with Dropdown -->
       <div class="download-dropdown">
-        <a href="https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64-setup.exe" class="btn btn-primary btn-lg">
+        <a href="https://github.com/mjb4khshi/chavosh/releases/download/v1.0.0/Chavosh_1.0.0_x64-setup.exe" class="btn btn-primary btn-lg">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span data-fa="دانلود مستقیم برای ویندوز" data-en="Download for Windows">دانلود مستقیم برای ویندوز</span>
-          <span style="font-size: 0.75rem; opacity: 0.8; font-family: monospace;">(x64 .exe)</span>
+          <span style="font-size: 0.75rem; opacity: 0.85; font-family: monospace;">(v1.0.0)</span>
         </a>
 
         <!-- Dropdown Packages -->
         <div class="dropdown-menu">
-          <a href="https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64-setup.exe" class="dropdown-item">
+          <a href="https://github.com/mjb4khshi/chavosh/releases/download/v1.0.0/Chavosh_1.0.0_x64-setup.exe" class="dropdown-item">
             <div class="icon">⚡</div>
             <div class="details">
-              <span data-fa="نصب‌کننده ویزارد ویندوز (پیشنهادی)" data-en="Windows Setup Installer (Recommended)">نصب‌کننده ویزارد ویندوز (پیشنهادی)</span>
-              <span>Chavosh_0.1.0_x64-setup.exe</span>
+              <span data-fa="نصاب ویزارد ویندوز (پیشنهادی)" data-en="Windows Setup (.exe)">نصاب ویزارد ویندوز (پیشنهادی)</span>
+              <span>Chavosh_1.0.0_x64-setup.exe</span>
             </div>
           </a>
 
-          <a href="https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_Portable.zip" class="dropdown-item">
-            <div class="icon">📁</div>
-            <div class="details">
-              <span data-fa="بسته پرتابل زیپ (بدون نیاز به نصب)" data-en="Portable ZIP Package">بسته پرتابل زیپ (بدون نیاز به نصب)</span>
-              <span>Chavosh_0.1.0_Portable.zip</span>
-            </div>
-          </a>
-
-          <a href="https://github.com/mjb4khshi/Chavosh/releases/download/v0.1.0/Chavosh_0.1.0_x64_en-US.msi" class="dropdown-item">
+          <a href="https://github.com/mjb4khshi/chavosh/releases/download/v1.0.0/Chavosh_1.0.0_x64_en-US.msi" class="dropdown-item">
             <div class="icon">📦</div>
             <div class="details">
-              <span data-fa="بسته نصبی ام‌اس‌آی" data-en="Windows MSI Package">بسته نصبی ام‌اس‌آی</span>
-              <span>Chavosh_0.1.0_x64_en-US.msi</span>
+              <span data-fa="بسته نصبی ویندوز ام‌اس‌آی" data-en="Windows MSI Package">بسته نصبی ویندوز ام‌اس‌آی</span>
+              <span>Chavosh_1.0.0_x64_en-US.msi</span>
+            </div>
+          </a>
+
+          <a href="https://github.com/mjb4khshi/chavosh/releases/latest" class="dropdown-item">
+            <div class="icon">📁</div>
+            <div class="details">
+              <span data-fa="مشاهده تمام بسته‌ها در گیت‌هاب" data-en="All Release Assets on GitHub">مشاهده تمام بسته‌ها در گیت‌هاب</span>
+              <span>Portable & Source</span>
             </div>
           </a>
         </div>
@@ -653,6 +700,55 @@
     <!-- Banner Showcase -->
     <div class="hero-banner-wrap">
       <img src="./banner.png" alt="Chavosh Application Showcase" />
+    </div>
+  </section>
+
+  <!-- Key Highlights Section -->
+  <section id="features" class="section container">
+    <div class="section-header">
+      <span class="section-tag" data-fa="قابلیت‌های جدید" data-en="Superpowers">قابلیت‌های جدید</span>
+      <h2 class="section-title" data-fa="آمیزه‌ای از فیزیک آنالوگ و فناوری مدرن" data-en="Analog Soul Meets Modern Tech">آمیزه‌ای از فیزیک آنالوگ و فناوری مدرن</h2>
+      <p class="section-subtitle" data-fa="طراحی شده با نهایت دقت در جزییات برای ایجاد لذت‌بخش‌ترین تجربه شنیداری." data-en="Crafted with extreme attention to detail for the ultimate desktop listening experience.">
+        طراحی شده با نهایت دقت در جزییات برای ایجاد لذت‌بخش‌ترین تجربه شنیداری.
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <div class="feature-icon">🎙️</div>
+        <h3 data-fa="لیریک همگام کارائوکه" data-en="Synced Karaoke Lyrics">لیریک همگام کارائوکه</h3>
+        <p data-fa="پخش زنده متن هماهنگ با آهنگ، اسکرول خودکار نرم، جستجوی بلادرنگ در LRCLIB و زیرنویس‌های یوتیوب با امکان آپلود و ویرایش فایل .lrc." data-en="Live synchronized lyrics with smooth auto-scroll, automatic LRCLIB & YouTube search, and custom .lrc file support.">
+          پخش زنده متن هماهنگ با آهنگ، اسکرول خودکار نرم، جستجوی بلادرنگ در LRCLIB و زیرنویس‌های یوتیوب با امکان آپلود و ویرایش فایل .lrc.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <div class="feature-icon">🌊</div>
+        <h3 data-fa="اکولایزر مایع امواج دور وینیل" data-en="Liquid Wave Visualizer">اکولایزر مایع امواج دور وینیل</h3>
+        <p data-fa="روبان امواج سیال دور دیسک متصل به ۶۴ باند فرکانسی Web Audio، کاملاً همرنگ با پالت لیریک و کاور آلبوم." data-en="Audiophile liquid undulating wave ring driven by live 64-band FFT audio, dynamically colored to match album artwork.">
+          روبان امواج سیال دور دیسک متصل به ۶۴ باند فرکانسی Web Audio، کاملاً همرنگ با پالت لیریک و کاور آلبوم.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 data-fa="پالس فنری ضرباهنگ (Kick Pulse)" data-en="Kick Transient Beat Pulse">پالس فنری ضرباهنگ (Kick Pulse)</h3>
+        <p data-fa="جداسازی هوشمند ضربه طبل و کیک از فرکانس بیس ممتد با جهش فیزیکی دیسک وینیل شبیه به ساب‌ووفر و بازگشت آنی به حالت استراحت." data-en="Intelligent transient flux onset detection delivering an authentic speaker-cone thump on drum kicks with clean rest recovery.">
+          جداسازی هوشمند ضربه طبل و کیک از فرکانس بیس ممتد با جهش فیزیکی دیسک وینیل شبیه به ساب‌ووفر و بازگشت آنی به حالت استراحت.
+        </p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <div class="feature-icon">🎚️</div>
+        <h3 data-fa="کراس‌فید دو دک بدون وقفه" data-en="Dual-Deck Gapless Crossfade">کراس‌فید دو دک بدون وقفه</h3>
+        <p data-fa="دو دک صوتی مجزا برای انتقال بی‌نقص و بدون سکوت بین قطعات موسیقی همراه با امکان پرش به اوج آهنگ (Remix Jump)." data-en="Dual independent audio decks delivering gapless playback and automated DJ-grade crossfading between songs.">
+          دو دک صوتی مجزا برای انتقال بی‌نقص و بدون سکوت بین قطعات موسیقی همراه با امکان پرش به اوج آهنگ (Remix Jump).
+        </p>
+      </div>
     </div>
   </section>
 
@@ -676,8 +772,8 @@
             نمایش گرید و لیست آلبوم‌ها، مدیریت پیشرفته صف پخش (Queue)، سیستم هوشمند جستجوی سریع فارسی و انگلیسی با Ctrl+K، و کارت‌های آماری بنتو.
           </p>
         </div>
-        <div style="height: 120px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-dim);">
-          🗂️ Sarv UI Bento Grid & Fast Queue
+        <div style="height: 100px; border-radius: 12px; background: rgba(0,0,0,0.35); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-dim); font-size: 0.9rem;">
+          🗂️ Sarv UI Bento Grid • Fast Queue • Instant Search
         </div>
       </div>
 
@@ -686,8 +782,8 @@
         <div>
           <span class="mode-badge">Fullscreen Overlay</span>
           <h3 data-fa="اتاق گرامافون و دیسک سی‌دی" data-en="Vinyl Room & CD Player">اتاق گرامافون و دیسک سی‌دی</h3>
-          <p data-fa="چرخش واقعی واینیل، بازتاب هفت‌رنگ سی‌دی، حرکت فیزیکی بازوی سوزن و انیمیشن‌های نرم تعویض کاور و متن آهنگ." data-en="Realistic spinning grooves, CD rainbow sheen, tonearm physics, and smooth crossfade transitions.">
-            چرخش واقعی واینیل، بازتاب هفت‌رنگ سی‌دی، حرکت فیزیکی بازوی سوزن و انیمیشن‌های نرم تعویض کاور و متن آهنگ.
+          <p data-fa="چرخش واقعی واینیل، بازتاب هفت‌رنگ سی‌دی، حرکت فیزیکی بازوی سوزن، اکولایزر مایع امواج و پالس هماهنگ با ضرباهنگ." data-en="Realistic spinning grooves, CD rainbow sheen, tonearm physics, liquid wave equalizer, and reactive beat pulse.">
+            چرخش واقعی واینیل، بازتاب هفت‌رنگ سی‌دی، حرکت فیزیکی بازوی سوزن، اکولایزر مایع امواج و پالس هماهنگ با ضرباهنگ.
           </p>
         </div>
         <div class="vinyl-preview-box">
@@ -738,8 +834,8 @@
 
     <!-- Theme Switcher Pills -->
     <div class="themes-wrapper">
-      <button class="theme-pill active" onclick="setTheme('#0066a4', this)">
-        <span class="theme-dot" style="background: #0066a4;"></span>
+      <button class="theme-pill active" onclick="setTheme('#0088cc', this)">
+        <span class="theme-dot" style="background: #0088cc;"></span>
         <span>چاووش تیره (Chavosh Dark)</span>
       </button>
 
@@ -821,6 +917,11 @@
             <td><kbd>P</kbd></td>
             <td data-fa="پین پنجره (Always on Top)" data-en="Pin Window">پین پنجره (Always on Top)</td>
             <td data-fa="نگه‌داشتن پلیر بالای همه برنامه‌ها" data-en="Keep player on top of all windows">نگه‌داشتن پلیر بالای همه برنامه‌ها</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl</kbd> + <kbd>L</kbd></td>
+            <td data-fa="لیریک آهنگ" data-en="Lyrics View">لیریک آهنگ</td>
+            <td data-fa="باز و بسته کردن پنجره لیریک همگام" data-en="Toggle synced karaoke lyrics">باز و بسته کردن پنجره لیریک همگام</td>
           </tr>
         </tbody>
       </table>

@@ -195,27 +195,90 @@ fn start_dragging(window: tauri::Window) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_track_cover(path: String) -> Result<Option<String>, String> {
+async fn get_track_cover(path: String) -> Result<Option<String>, String> {
     use base64::prelude::*;
     let p = Path::new(&path);
     if !p.exists() {
         return Ok(None);
     }
-    let tagged = match lofty::read_from_path(p) {
-        Ok(t) => t,
-        Err(_) => return Ok(None),
-    };
-    let tag = tagged.primary_tag().or_else(|| tagged.first_tag());
-    if let Some(tag) = tag {
-        if let Some(pic) = tag.pictures().first() {
-            let mime_str = match pic.mime_type() {
-                Some(m) => m.as_str(),
-                None => "image/jpeg",
-            };
-            let b64 = BASE64_STANDARD.encode(pic.data());
-            return Ok(Some(format!("data:{};base64,{}", mime_str, b64)));
+
+    // 1. Embedded tags in the audio file FIRST (The song's own exact artwork!)
+    if let Ok(tagged) = lofty::read_from_path(p) {
+        for tag in tagged.tags() {
+            if let Some(pic) = tag.pictures().first() {
+                let mime_str = match pic.mime_type() {
+                    Some(m) => m.as_str(),
+                    None => "image/jpeg",
+                };
+                let b64 = BASE64_STANDARD.encode(pic.data());
+                return Ok(Some(format!("data:{};base64,{}", mime_str, b64)));
+            }
         }
     }
+
+    // 2. FALLBACK ONLY: Check companion image files in the same folder if track has no embedded art
+    if let Some(parent) = p.parent() {
+        for name in &[
+            "cover.jpg", "cover.png", "folder.jpg", "folder.png",
+            "front.jpg", "front.png", "artwork.jpg", "cover.jpeg"
+        ] {
+            let img_p = parent.join(name);
+            if img_p.is_file() {
+                if let Ok(data) = std::fs::read(&img_p) {
+                    let mime = if name.ends_with(".png") { "image/png" } else { "image/jpeg" };
+                    let b64 = BASE64_STANDARD.encode(&data);
+                    return Ok(Some(format!("data:{};base64,{}", mime, b64)));
+                }
+            }
+        }
+    }
+
+    Ok(None)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrackLyrics {
+    pub synced: Option<String>,
+    pub plain: Option<String>,
+    pub source: String,
+}
+
+#[tauri::command]
+async fn get_track_lyrics(path: String) -> Result<Option<TrackLyrics>, String> {
+    let p = Path::new(&path);
+
+    // 1. Check companion .lrc file (e.g. /path/to/song.lrc)
+    let lrc_path = p.with_extension("lrc");
+    if lrc_path.is_file() {
+        if let Ok(content) = std::fs::read_to_string(&lrc_path) {
+            let is_synced = content.contains('[') && content.contains(']');
+            return Ok(Some(TrackLyrics {
+                synced: if is_synced { Some(content.clone()) } else { None },
+                plain: Some(content),
+                source: "lrc_file".into(),
+            }));
+        }
+    }
+
+    // 2. Check embedded tag with lofty across ALL tags (ID3v2, Vorbis, FLAC, MP4)
+    if p.is_file() {
+        if let Ok(tagged) = lofty::read_from_path(p) {
+            for tag in tagged.tags() {
+                if let Some(lyrics) = tag.get_string(&ItemKey::Lyrics) {
+                    let trimmed = lyrics.trim();
+                    if !trimmed.is_empty() {
+                        let is_synced = trimmed.contains('[') && trimmed.contains(']');
+                        return Ok(Some(TrackLyrics {
+                            synced: if is_synced { Some(trimmed.to_string()) } else { None },
+                            plain: Some(trimmed.to_string()),
+                            source: "embedded".into(),
+                        }));
+                    }
+                }
+            }
+        }
+    }
+
     Ok(None)
 }
 
@@ -238,7 +301,8 @@ pub fn run() {
             set_always_on_top,
             is_always_on_top,
             start_dragging,
-            get_track_cover
+            get_track_cover,
+            get_track_lyrics
         ])
         .run(tauri::generate_context!())
         .expect("error while running chavosh");

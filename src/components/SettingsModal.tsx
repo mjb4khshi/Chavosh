@@ -1,24 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Check, Palette, Sliders, Zap, Pin, Sparkles, Monitor, ChevronDown } from "lucide-react";
+import { X, Check, Palette, Sliders, Zap, Pin, Sparkles, Monitor, ChevronDown, Disc, Info, User, Github, ExternalLink } from "lucide-react";
 import { usePlayerStore } from "../stores/playerStore";
 import { setAlwaysOnTop } from "../utils/window";
 
-export const SARV_THEMES = [
-  { id: "persian-dark", name: "Iranian Dark", persianName: "اصیل ایرانی (تیره)", dot: "#0066a4" },
-  { id: "persian-light", name: "Iranian Light", persianName: "روشن ایرانی", dot: "#0066a4" },
-  { id: "cyberpunk", name: "Cyberpunk Neon", persianName: "سایبرپانک نئون", dot: "#00f0ff" },
-  { id: "tokyo-midnight", name: "Karaj Midnight", persianName: "کرج نیمه‌شب", dot: "#8b5cf6" },
-  { id: "ocean-abyss", name: "Persian Gulf", persianName: "خلیج فارس", dot: "#06b6d4" },
-  { id: "emerald", name: "Emerald Forest", persianName: "زمرد کهنسال", dot: "#10b981" },
-  { id: "royal-purple", name: "Royal Purple", persianName: "بنفش سلطنتی", dot: "#a855f7" },
-  { id: "crimson", name: "Crimson Velvet", persianName: "زرشکی مخمل", dot: "#f43f5e" },
-  { id: "coffee-roast", name: "Coffee Roast", persianName: "اسپرسو و شکلات", dot: "#d97706" },
-  { id: "sunset", name: "Robat Karim Sunset", persianName: "غروب رباط کریم", dot: "#ff5e36" },
-  { id: "matcha", name: "Matcha Blossom", persianName: "ماچا بهاری", dot: "#15803d" },
-  { id: "nordic", name: "Nordic Glacier", persianName: "یخچال نوردیک", dot: "#0284c7" },
-  { id: "rose-gold", name: "Rose Gold", persianName: "رز گلد براق", dot: "#e11d48" },
-  { id: "persian-dark-sharp", name: "Dark Sharp", persianName: "زاویه‌دار تیره", dot: "#0066a4" },
-  { id: "persian-light-sharp", name: "Light Sharp", persianName: "زاویه‌دار روشن", dot: "#0066a4" },
+const SARV_THEMES = [
+  { id: "persian-dark", name: "Persian Dark", dot: "#0066a4" },
+  { id: "persian-light", name: "Persian Light", dot: "#0066a4" },
+  { id: "cyberpunk", name: "Cyberpunk Neon", dot: "#00f0ff" },
+  { id: "tokyo-midnight", name: "Karaj Midnight", dot: "#8b5cf6" },
+  { id: "ocean-abyss", name: "Persian Gulf", dot: "#06b6d4" },
+  { id: "emerald", name: "Emerald Forest", dot: "#10b981" },
+  { id: "royal-purple", name: "Royal Purple", dot: "#a855f7" },
+  { id: "crimson", name: "Crimson Velvet", dot: "#f43f5e" },
+  { id: "coffee-roast", name: "Coffee Roast", dot: "#d97706" },
+  { id: "sunset", name: "Robat Karim Sunset", dot: "#ff5e36" },
+  { id: "matcha", name: "Matcha Blossom", dot: "#15803d" },
+  { id: "nordic", name: "Nordic Glacier", dot: "#0284c7" },
+  { id: "rose-gold", name: "Rose Gold", dot: "#e11d48" },
+  { id: "persian-dark-sharp", name: "Persian Dark Sharp", dot: "#0066a4" },
+  { id: "persian-light-sharp", name: "Persian Light Sharp", dot: "#0066a4" },
 ];
 
 interface SwitchProps {
@@ -65,6 +65,8 @@ export function SettingsModal() {
   const setShowSettings = usePlayerStore((s) => s.setShowSettings);
   const alwaysOnTop = usePlayerStore((s) => s.alwaysOnTop);
   const toggleAlwaysOnTop = usePlayerStore((s) => s.toggleAlwaysOnTop);
+  const playerStyle = usePlayerStore((s) => s.playerStyle);
+  const setPlayerStyle = usePlayerStore((s) => s.setPlayerStyle);
 
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -123,7 +125,7 @@ export function SettingsModal() {
               <h2 className="text-sm font-bold tracking-wide text-base-content">
                 Settings & Appearance
               </h2>
-              <p className="text-[11px] text-neutral">تنظیمات ظاهر، پخش و پنجره چاووش</p>
+              <p className="text-[11px] text-neutral">Customize appearance, playback, and window behavior</p>
             </div>
           </div>
           <button
@@ -145,7 +147,7 @@ export function SettingsModal() {
                   style={{ color: "var(--primary, var(--theme-color-primary, #0066a4))" }}
                 />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/85">
-                  Color Theme (تم برنامه)
+                  Color Theme
                 </h3>
               </div>
               <span className="text-[11px] text-neutral font-mono">15 Sarv Themes</span>
@@ -163,12 +165,9 @@ export function SettingsModal() {
                     className="w-4 h-4 rounded-full shrink-0 shadow-md ring-2 ring-base-content/15"
                     style={{ background: currentTheme.dot }}
                   />
-                  <div className="text-right flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2 truncate">
                     <span className="text-xs font-bold text-base-content">
                       {currentTheme.name}
-                    </span>
-                    <span className="text-[11px] text-neutral truncate">
-                      ({currentTheme.persianName})
                     </span>
                   </div>
                 </div>
@@ -223,9 +222,6 @@ export function SettingsModal() {
                           >
                             {t.name}
                           </span>
-                          <span className="text-[10px] text-neutral truncate">
-                            {t.persianName}
-                          </span>
                         </div>
                         {isSelected && (
                           <Check
@@ -251,7 +247,7 @@ export function SettingsModal() {
                 style={{ color: "var(--primary, var(--theme-color-primary, #0066a4))" }}
               />
               <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/85">
-                Playback Engine (موتور پخش)
+                Playback Engine
               </h3>
             </div>
 
@@ -262,7 +258,7 @@ export function SettingsModal() {
                   Seamless Track Crossfade
                 </div>
                 <div className="text-[11px] text-neutral mt-0.5">
-                  فید و پیوند روان بین آهنگ‌های متوالی در صف پخش
+                  Smoothly fade and blend consecutive tracks in the queue
                 </div>
               </div>
               <SarvSwitch
@@ -300,7 +296,7 @@ export function SettingsModal() {
                   Party Remix Engine
                 </div>
                 <div className="text-[11px] text-neutral mt-0.5">
-                  میکس خودکار پرانرژی‌ترین بخش‌های ۳۰ الی ۵۰ ثانیه‌ای برای مهمانی
+                  Auto-mix energetic 30 to 50-second highlights for parties
                 </div>
               </div>
               <SarvSwitch
@@ -318,7 +314,7 @@ export function SettingsModal() {
                 style={{ color: "var(--primary, var(--theme-color-primary, #0066a4))" }}
               />
               <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/85">
-                Window & Visuals (پنجره و جلوه‌ها)
+                Window & Visuals
               </h3>
             </div>
 
@@ -334,10 +330,10 @@ export function SettingsModal() {
                         : "currentColor",
                     }}
                   />
-                  Always on Top (پین روی تمام برنامه‌ها)
+                  Always on Top
                 </div>
                 <div className="text-[11px] text-neutral mt-0.5">
-                  نگه‌داشتن پنجره چاووش در بالاترین لایه دسکتاپ
+                  Keep Chavosh window floating on top of all applications
                 </div>
               </div>
               <SarvSwitch checked={alwaysOnTop} onChange={handleTogglePin} />
@@ -350,13 +346,102 @@ export function SettingsModal() {
                   Dynamic Album Art Color Sync
                 </div>
                 <div className="text-[11px] text-neutral mt-0.5">
-                  تغییر هوشمند رنگ تم به رنگ غالب و زنده کاور آهنگ جاری
+                  Dynamically adapt UI accent colors to the current track's album cover
                 </div>
               </div>
               <SarvSwitch
                 checked={settings.coverTint}
                 onChange={(val) => updateSettings({ coverTint: val })}
               />
+            </div>
+
+            {/* Turntable Disc Style (Vinyl vs CD) */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-base-content/[0.03] border border-base-content/[0.08] hover:border-base-content/[0.14] transition-colors">
+              <div className="min-w-0 pr-3">
+                <div className="text-xs font-bold text-base-content flex items-center gap-1.5">
+                  <Disc
+                    size={13}
+                    style={{ color: "var(--primary, var(--theme-color-primary, #0066a4))" }}
+                  />
+                  Turntable Disc Style
+                </div>
+                <div className="text-[11px] text-neutral mt-0.5">
+                  Choose between vinyl record (with tonearm) or compact disc (CD)
+                </div>
+              </div>
+              <div className="flex items-center p-1 rounded-xl bg-base-content/[0.05] border border-base-content/[0.08] shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPlayerStyle("vinyl")}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    playerStyle === "vinyl"
+                      ? "bg-[var(--primary,var(--theme-color-primary,#0066a4))] text-white shadow-sm"
+                      : "text-neutral hover:text-base-content"
+                  }`}
+                >
+                  Vinyl
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlayerStyle("cd")}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    playerStyle === "cd"
+                      ? "bg-[var(--primary,var(--theme-color-primary,#0066a4))] text-white shadow-sm"
+                      : "text-neutral hover:text-base-content"
+                  }`}
+                >
+                  CD
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* About & Developer Section */}
+          <section className="space-y-3 pt-2 border-t border-base-content/10">
+            <div className="flex items-center gap-2">
+              <Info
+                size={14}
+                style={{ color: "var(--primary, var(--theme-color-primary, #0066a4))" }}
+              />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/85">
+                About & Developer
+              </h3>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-base-content/[0.04] border border-base-content/[0.08] flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[var(--primary,var(--theme-color-primary,#0066a4))]/15 flex items-center justify-center text-[var(--primary,var(--theme-color-primary,#0066a4))]">
+                    <User size={16} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-base-content">
+                      MJ Bakhshi
+                    </div>
+                    <div className="text-[10px] text-neutral">
+                      Creator & Lead Developer
+                    </div>
+                  </div>
+                </div>
+
+                <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-base-content/[0.08] text-base-content">
+                  v1.0.0
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-base-content/5">
+                <span className="text-[11px] text-neutral">GitHub Repository</span>
+                <a
+                  href="https://github.com/mjb4khshi/Chavosh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-base-content/[0.06] hover:bg-base-content/[0.12] text-xs font-bold text-base-content transition-colors cursor-pointer border border-base-content/10"
+                >
+                  <Github size={13} />
+                  <span>mjb4khshi/Chavosh</span>
+                  <ExternalLink size={11} className="opacity-60" />
+                </a>
+              </div>
             </div>
           </section>
         </div>

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import type { LyricsData } from "../utils/lyrics";
 
 export interface Track {
   id: number;
@@ -27,6 +28,8 @@ export interface Settings {
   remixMinSec: number;
   remixMaxSec: number;
   coverTint: boolean;
+  vinylVisualizerEnabled?: boolean;
+  vinylBeatPulseEnabled?: boolean;
 }
 
 interface PlayerState {
@@ -48,6 +51,15 @@ interface PlayerState {
   showQueueDrawer: boolean;
   setShowQueueDrawer: (show: boolean) => void;
   toggleQueueDrawer: () => void;
+  showLyrics: boolean;
+  setShowLyrics: (show: boolean) => void;
+  toggleLyrics: () => void;
+  currentLyrics: LyricsData | null;
+  setCurrentLyrics: (data: LyricsData | null) => void;
+  isLoadingLyrics: boolean;
+  lyricsFontSize: "sm" | "md" | "lg";
+  setLyricsFontSize: (size: "sm" | "md" | "lg") => void;
+  loadLyrics: (track: Track, forceOnline?: boolean) => Promise<void>;
   playerStyle: PlayerStyle;
   setPlayerStyle: (style: PlayerStyle) => void;
   gramophoneSize: GramophoneSize;
@@ -161,6 +173,29 @@ export const usePlayerStore = create<PlayerState>()(
       showQueueDrawer: false,
       setShowQueueDrawer: (show) => set({ showQueueDrawer: show }),
       toggleQueueDrawer: () => set((s) => ({ showQueueDrawer: !s.showQueueDrawer })),
+      showLyrics: false,
+      setShowLyrics: (show) => set({ showLyrics: show }),
+      toggleLyrics: () => set((s) => ({ showLyrics: !s.showLyrics })),
+      currentLyrics: null,
+      setCurrentLyrics: (data) => set({ currentLyrics: data }),
+      isLoadingLyrics: false,
+      lyricsFontSize: "md",
+      setLyricsFontSize: (size) => set({ lyricsFontSize: size }),
+      loadLyrics: async (track, forceOnline) => {
+        set({ isLoadingLyrics: true });
+        try {
+          const { fetchLyricsForTrack } = await import("../utils/lyricsService");
+          const lyrics = await fetchLyricsForTrack(track, forceOnline);
+          const current = selectCurrentTrack(get());
+          if (current && (current.id === track.id || current.path === track.path)) {
+            set({ currentLyrics: lyrics, isLoadingLyrics: false });
+          } else {
+            set({ isLoadingLyrics: false });
+          }
+        } catch {
+          set({ isLoadingLyrics: false });
+        }
+      },
       playerStyle: "vinyl",
       setPlayerStyle: (style) => set({ playerStyle: style }),
       gramophoneSize: "standard",
@@ -217,6 +252,8 @@ export const usePlayerStore = create<PlayerState>()(
         remixMinSec: 30,
         remixMaxSec: 50,
         coverTint: true,
+        vinylVisualizerEnabled: true,
+        vinylBeatPulseEnabled: true,
       },
 
       setTracks: (tracks) => set({ tracks }),
@@ -230,7 +267,7 @@ export const usePlayerStore = create<PlayerState>()(
 
       playTrack: (track, queue) => {
         if (queue) {
-          const idx = queue.findIndex((t) => t.id === track.id);
+          const idx = queue.findIndex((t) => t.path === track.path || t.id === track.id);
           set({
             queue,
             queueIndex: idx >= 0 ? idx : 0,
@@ -238,19 +275,26 @@ export const usePlayerStore = create<PlayerState>()(
             shuffle: false,
             isPlaying: true,
             currentTime: 0,
+            currentLyrics: null,
           });
         } else {
           const { queue: currentQueue } = get();
-          const idx = currentQueue.findIndex((t) => t.id === track.id);
+          const idx = currentQueue.findIndex((t) => t.path === track.path || t.id === track.id);
           if (idx === -1) {
             set({
               queue: [track, ...currentQueue],
               queueIndex: 0,
               isPlaying: true,
               currentTime: 0,
+              currentLyrics: null,
             });
           } else {
-            set({ queueIndex: idx, isPlaying: true, currentTime: 0 });
+            set({
+              queueIndex: idx,
+              isPlaying: true,
+              currentTime: 0,
+              currentLyrics: null,
+            });
           }
         }
       },
@@ -264,6 +308,7 @@ export const usePlayerStore = create<PlayerState>()(
           shuffle: false,
           isPlaying: true,
           currentTime: 0,
+          currentLyrics: null,
         });
       },
 
@@ -275,14 +320,33 @@ export const usePlayerStore = create<PlayerState>()(
             queueIndex: index,
             currentTime: initialTime !== undefined ? initialTime : 0,
             isPlaying: true,
+            currentLyrics: null,
           });
         }
       },
 
-      togglePlay: () => set((s) => ({ isPlaying: !s.isPlaying })),
-      play: () => set({ isPlaying: true }),
+      togglePlay: () => {
+        const { queue, tracks, playQueue, isPlaying } = get();
+        if (queue.length === 0) {
+          if (tracks.length > 0) {
+            playQueue(tracks, 0);
+          }
+          return;
+        }
+        set({ isPlaying: !isPlaying });
+      },
+      play: () => {
+        const { queue, tracks, playQueue } = get();
+        if (queue.length === 0) {
+          if (tracks.length > 0) {
+            playQueue(tracks, 0);
+          }
+          return;
+        }
+        set({ isPlaying: true });
+      },
       pause: () => set({ isPlaying: false }),
-      resume: () => set({ isPlaying: true }),
+      resume: () => get().play(),
 
       next: () => {
         const { queue, queueIndex, repeat, shuffle, shuffleQueue } = get();
@@ -296,7 +360,7 @@ export const usePlayerStore = create<PlayerState>()(
             return;
           }
         }
-        set({ queueIndex: nextIdx, currentTime: 0, isPlaying: true });
+        set({ queueIndex: nextIdx, currentTime: 0, isPlaying: true, currentLyrics: null });
       },
 
       prev: () => {
@@ -308,7 +372,7 @@ export const usePlayerStore = create<PlayerState>()(
           return;
         }
         const prevIdx = Math.max(0, queueIndex - 1);
-        set({ queueIndex: prevIdx, currentTime: 0, isPlaying: true });
+        set({ queueIndex: prevIdx, currentTime: 0, isPlaying: true, currentLyrics: null });
       },
 
       seek: (time) => set({ currentTime: time }),
@@ -415,6 +479,7 @@ export const usePlayerStore = create<PlayerState>()(
         repeat: state.repeat,
         shuffle: state.shuffle,
         activeTab: state.activeTab,
+        lyricsFontSize: state.lyricsFontSize,
       }),
     }
   )

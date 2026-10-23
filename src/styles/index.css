@@ -219,17 +219,17 @@ body,
 /* Gramophone disc stage: fluidly and tightly fits the window with comfortable shadow cushion */
 .disc-stage {
   width: min(
-    calc(100vw - 28px),
-    calc(100vh - 28px),
-    calc(360px * var(--gramophone-scale, 1) - 28px)
+    calc(100vw - 32px),
+    calc(100vh - 68px),
+    calc(360px * var(--gramophone-scale, 1) - 32px)
   );
   height: min(
-    calc(100vw - 28px),
-    calc(100vh - 28px),
-    calc(360px * var(--gramophone-scale, 1) - 28px)
+    calc(100vw - 32px),
+    calc(100vh - 68px),
+    calc(360px * var(--gramophone-scale, 1) - 32px)
   );
-  max-width: calc(100vw - 16px);
-  max-height: calc(100vh - 16px);
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 64px);
   aspect-ratio: 1 / 1;
   transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1), height 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -281,9 +281,11 @@ body,
 }
 .spinning {
   animation: vinyl-spin 3.8s linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
 }
 .spinning-paused {
-  animation-play-state: paused;
+  animation-play-state: paused !important;
 }
 
 /* Equalizer Bars for Nano/Pico Mode */
@@ -292,10 +294,10 @@ body,
 @keyframes bar-dance-3 { 0%, 100% { height: 8px; } 50% { height: 22px; } }
 @keyframes bar-dance-4 { 0%, 100% { height: 20px; } 50% { height: 10px; } }
 
-.eq-bar-1 { animation: bar-dance-1 0.7s ease-in-out infinite; }
-.eq-bar-2 { animation: bar-dance-2 0.85s ease-in-out infinite; }
-.eq-bar-3 { animation: bar-dance-3 0.6s ease-in-out infinite; }
-.eq-bar-4 { animation: bar-dance-4 0.9s ease-in-out infinite; }
+.eq-bar-1 { animation: bar-dance-1 0.7s ease-in-out infinite; will-change: height; }
+.eq-bar-2 { animation: bar-dance-2 0.85s ease-in-out infinite; will-change: height; }
+.eq-bar-3 { animation: bar-dance-3 0.6s ease-in-out infinite; will-change: height; }
+.eq-bar-4 { animation: bar-dance-4 0.9s ease-in-out infinite; will-change: height; }
 
 /* ── Sarv UI Official Input System ── */
 .sarv-input-wrapper {
@@ -380,11 +382,6 @@ body,
   );
   border: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.35);
-}
-
-/* Smooth Root Theme Transitions */
-:root {
-  transition: color 0.4s ease, border-color 0.4s ease;
 }
 
 /* ─ Album Sleeve (gramophone full-artwork view) ── */
@@ -569,4 +566,24 @@ body,
 :root {
   transition: color 0.4s ease, border-color 0.4s ease;
 }
+
+/* ── Sarv Badge Neutral Color Overrides ── */
+/* Fixes faulty upstream `oklch(87% 0 none)` in sarv-ui which blinded dark themes */
+.badge-soft-neutral {
+  background-color: color-mix(in oklab, var(--theme-color-neutral) 16%, transparent) !important;
+  color: var(--theme-color-neutral) !important;
+  border: 1px solid color-mix(in oklab, var(--theme-color-neutral) 14%, transparent);
+}
+
+.badge-neutral {
+  background-color: color-mix(in oklab, var(--theme-color-neutral) 85%, var(--theme-color-base, #000000)) !important;
+  color: var(--theme-color-neutral-content, #ffffff) !important;
+}
+
+.badge-outline-neutral {
+  border: 1px solid color-mix(in oklab, var(--theme-color-neutral) 35%, transparent) !important;
+  color: var(--theme-color-neutral) !important;
+  background-color: transparent !important;
+}
+
 

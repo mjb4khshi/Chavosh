@@ -80,7 +80,7 @@ export default function SarvBadge({
   return (
     <span
       className={`${badgeClass} ${className}`}
-      style={{ display: "inline-flex", alignItems: "center" }}
+      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
       {...props}
     >
       {dot && (
